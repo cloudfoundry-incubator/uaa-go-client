@@ -16,17 +16,24 @@ import (
 	"github.com/pivotal-golang/lager"
 
 	"github.com/cf-routing/uaa-go-client/config"
+	"github.com/cf-routing/uaa-go-client/schema"
 )
 
+type uaaKey struct {
+	Alg   string `json:"alg"`
+	Value string `json:"value"`
+}
+
 type Client interface {
-	FetchToken(forceUpdate bool) (Token, error)
+	FetchToken(forceUpdate bool) (schema.Token, error)
+	FetchKey() (string, error)
 }
 
 type UaaClient struct {
 	clock            clock.Clock
 	config           *config.Config
 	client           *http.Client
-	cachedToken      *Token
+	cachedToken      *schema.Token
 	refetchTokenTime int64
 	lock             *sync.Mutex
 	logger           lager.Logger
@@ -63,7 +70,7 @@ func NewClient(logger lager.Logger, cfg *config.Config, clock clock.Clock) (*Uaa
 	}, nil
 }
 
-func (u *UaaClient) FetchToken(forceUpdate bool) (*Token, error) {
+func (u *UaaClient) FetchToken(forceUpdate bool) (*schema.Token, error) {
 	u.logger.Debug("fetching-token", lager.Data{"force-update": forceUpdate})
 	u.lock.Lock()
 	defer u.lock.Unlock()
@@ -75,7 +82,7 @@ func (u *UaaClient) FetchToken(forceUpdate bool) (*Token, error) {
 
 	retry := true
 	var retryCount uint32 = 0
-	var token *Token
+	var token *schema.Token
 	var err error
 	for retry == true {
 		token, retry, err = u.doFetch()
@@ -98,7 +105,7 @@ func (u *UaaClient) FetchToken(forceUpdate bool) (*Token, error) {
 	return token, nil
 }
 
-func (u *UaaClient) doFetch() (*Token, bool, error) {
+func (u *UaaClient) doFetch() (*schema.Token, bool, error) {
 	values := url.Values{}
 	values.Add("grant_type", "client_credentials")
 	requestBody := values.Encode()
@@ -137,7 +144,7 @@ func (u *UaaClient) doFetch() (*Token, bool, error) {
 		return nil, retry, errors.New(fmt.Sprintf("status code: %d, body: %s", resp.StatusCode, body))
 	}
 
-	token := &Token{}
+	token := &schema.Token{}
 	err = json.Unmarshal(body, token)
 	if err != nil {
 		u.logger.Debug("error-umarshalling-token", lager.Data{"error": err.Error()})
@@ -146,11 +153,42 @@ func (u *UaaClient) doFetch() (*Token, bool, error) {
 	return token, false, nil
 }
 
+func (u *UaaClient) FetchKey() (string, error) {
+	logger := u.logger.Session("uaa-key-fetcher")
+	logger.Info("fetch-key-started")
+	defer logger.Info("fetch-key-completed")
+	getKeyUrl := fmt.Sprintf("%s/token_key", u.config.UaaEndpoint)
+
+	resp, err := u.client.Get(getKeyUrl)
+	if err != nil {
+		logger.Error("error-in-fetching-key", err)
+		return "", err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		err = errors.New("http-error-fetching-key")
+		logger.Error("http-error-fetching-key", err)
+		return "", err
+	}
+
+	decoder := json.NewDecoder(resp.Body)
+
+	uaaKey := schema.UaaKey{}
+	err = decoder.Decode(&uaaKey)
+	if err != nil {
+		logger.Error("error-in-unmarshaling-key", err)
+		return "", err
+	}
+	logger.Info("fetch-key-successful")
+
+	return uaaKey.Value, nil
+}
+
 func (u *UaaClient) canReturnCachedToken() bool {
 	return u.cachedToken != nil && u.clock.Now().Unix() < u.refetchTokenTime
 }
 
-func (u *UaaClient) updateCachedToken(token *Token) {
+func (u *UaaClient) updateCachedToken(token *schema.Token) {
 	u.logger.Debug("caching-token")
 	u.cachedToken = token
 	u.refetchTokenTime = u.clock.Now().Unix() + (token.ExpiresIn - u.config.ExpirationBufferInSec)
