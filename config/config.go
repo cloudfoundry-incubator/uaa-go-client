@@ -13,4 +13,12 @@ type Config struct {
 	MaxNumberOfRetries    uint32
 	RetryInterval         time.Duration
 	ExpirationBufferInSec int64
+	TLSconfig             *TLSconfig
+}
+
+type TLSconfig struct {
+	CertFile         string
+	KeyFile          string
+	CaFile           string
+	SkipVerification bool
 }

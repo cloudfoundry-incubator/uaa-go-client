@@ -20,6 +20,7 @@ import (
 
 	"github.com/cf-routing/uaa-go-client/config"
 	"github.com/cf-routing/uaa-go-client/schema"
+	"github.com/cloudfoundry-incubator/cf_http"
 )
 
 type uaaKey struct {
@@ -62,6 +63,20 @@ func NewClient(logger lager.Logger, cfg *config.Config, clock clock.Clock) (*Uaa
 		return nil, errors.New("UAA endpoint cannot be empty")
 	}
 
+	var (
+		client *http.Client
+		err    error
+	)
+
+	if cfg.TLSconfig != nil {
+		client, err = newSecureClient(cfg)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		client = &http.Client{}
+	}
+
 	if cfg.ExpirationBufferInSec < 0 {
 		cfg.ExpirationBufferInSec = config.DefaultExpirationBufferInSec
 		logger.Info("Expiration buffer in seconds set to default", lager.Data{"value": config.DefaultExpirationBufferInSec})
@@ -70,10 +85,24 @@ func NewClient(logger lager.Logger, cfg *config.Config, clock clock.Clock) (*Uaa
 	return &UaaClient{
 		logger: logger,
 		config: cfg,
-		client: &http.Client{},
+		client: client,
 		clock:  clock,
 		lock:   new(sync.Mutex),
 	}, nil
+}
+
+func newSecureClient(cfg *config.Config) (*http.Client, error) {
+	tlsConfig, err := cf_http.NewTLSConfig(cfg.TLSconfig.CertFile, cfg.TLSconfig.KeyFile, cfg.TLSconfig.CaFile)
+	if err != nil {
+		return nil, err
+	}
+	tlsConfig.InsecureSkipVerify = cfg.TLSconfig.SkipVerification
+	tr := &http.Transport{
+		TLSClientConfig: tlsConfig,
+	}
+
+	client := &http.Client{Transport: tr}
+	return client, nil
 }
 
 func (u *UaaClient) FetchToken(forceUpdate bool) (*schema.Token, error) {
