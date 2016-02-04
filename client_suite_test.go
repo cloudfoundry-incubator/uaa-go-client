@@ -1,6 +1,8 @@
 package uaa_go_client_test
 
 import (
+	"fmt"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -27,9 +29,18 @@ func TestClient(t *testing.T) {
 }
 
 const (
+	TokenKeyEndpoint            = "/token_key"
 	DefaultMaxNumberOfRetries   = 3
 	DefaultRetryInterval        = 15 * time.Second
 	DefaultExpirationBufferTime = 30
+	ValidPemPublicKey           = `-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDHFr+KICms+tuT1OXJwhCUmR2d\nKVy7psa8xzElSyzqx7oJyfJ1JZyOzToj9T5SfTIq396agbHJWVfYphNahvZ/7uMX\nqHxf+ZH9BL1gk9Y6kCnbM5R60gfwjyW1/dQPjOzn9N394zd2FJoFHwdq9Qs0wBug\nspULZVNRxq7veq/fzwIDAQAB\n-----END PUBLIC KEY-----`
+	InvalidPemPublicKey         = `-----BEGIN PUBLIC KEY-----\nMJGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDHFr+KICms+tuT1OXJwhCUmR2d\nKVy7psa8xzElSyzqx7oJyfJ1JZyOzToj9T5SfTIq396agbHJWVfYphNahvZ/7uMX\nqHxf+ZH9BL1gk9Y6kCnbM5R60gfwjyW1/dQPjOzn9N394zd2FJoFHwdq9Qs0wBug\nspULZVNRxq7veq/fzwIDAQAB\n-----END PUBLIC KEY-----`
+	PemDecodedKey               = `-----BEGIN PUBLIC KEY-----
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDHFr+KICms+tuT1OXJwhCUmR2d
+KVy7psa8xzElSyzqx7oJyfJ1JZyOzToj9T5SfTIq396agbHJWVfYphNahvZ/7uMX
+qHxf+ZH9BL1gk9Y6kCnbM5R60gfwjyW1/dQPjOzn9N394zd2FJoFHwdq9Qs0wBug
+spULZVNRxq7veq/fzwIDAQAB
+-----END PUBLIC KEY-----`
 )
 
 var (
@@ -65,6 +76,13 @@ var getOauthHandlerFunc = func(status int, token *schema.Token) http.HandlerFunc
 		}),
 		verifyBody("grant_type=client_credentials"),
 		ghttp.RespondWithJSONEncoded(status, token),
+	)
+}
+
+var getSuccessKeyFetchHandler = func(key string) http.HandlerFunc {
+	return ghttp.CombineHandlers(
+		ghttp.VerifyRequest("GET", TokenKeyEndpoint),
+		ghttp.RespondWith(http.StatusOK, fmt.Sprintf("{\"alg\":\"alg\", \"value\": \"%s\" }", key)),
 	)
 }
 

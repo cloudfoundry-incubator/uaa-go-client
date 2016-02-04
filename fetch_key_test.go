@@ -2,11 +2,13 @@ package uaa_go_client_test
 
 import (
 	"errors"
-	"github.com/pivotal-golang/lager/lagertest"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/pivotal-golang/lager/lagertest"
 
 	"github.com/cf-routing/uaa-go-client"
 	"github.com/cf-routing/uaa-go-client/config"
@@ -21,9 +23,6 @@ import (
 
 var _ = Describe("Fetch Key", func() {
 
-	const (
-		TOKEN_KEY_ENDPOINT = "/token_key"
-	)
 	var (
 		client *uaa_go_client.UaaClient
 		err    error
@@ -71,7 +70,7 @@ var _ = Describe("Fetch Key", func() {
 				BeforeEach(func() {
 					server.AppendHandlers(
 						ghttp.CombineHandlers(
-							ghttp.VerifyRequest("GET", TOKEN_KEY_ENDPOINT),
+							ghttp.VerifyRequest("GET", TokenKeyEndpoint),
 							ghttp.RespondWith(http.StatusOK, `{}`),
 						),
 					)
@@ -86,8 +85,8 @@ var _ = Describe("Fetch Key", func() {
 				BeforeEach(func() {
 					server.AppendHandlers(
 						ghttp.CombineHandlers(
-							ghttp.VerifyRequest("GET", TOKEN_KEY_ENDPOINT),
-							ghttp.RespondWith(http.StatusOK, `{"alg":"alg", "value": "AABBCC" }`),
+							ghttp.VerifyRequest("GET", TokenKeyEndpoint),
+							ghttp.RespondWith(http.StatusOK, fmt.Sprintf("{\"alg\":\"alg\", \"value\": \"%s\" }", ValidPemPublicKey)),
 						),
 					)
 				})
@@ -95,7 +94,7 @@ var _ = Describe("Fetch Key", func() {
 				It("returns the key value", func() {
 					Expect(err).NotTo(HaveOccurred())
 					Expect(key).NotTo(BeNil())
-					Expect(key).Should(Equal("AABBCC"))
+					Expect(key).Should(Equal(PemDecodedKey))
 				})
 
 				It("logs success message", func() {
@@ -107,7 +106,7 @@ var _ = Describe("Fetch Key", func() {
 				BeforeEach(func() {
 					server.AppendHandlers(
 						ghttp.CombineHandlers(
-							ghttp.VerifyRequest("GET", TOKEN_KEY_ENDPOINT),
+							ghttp.VerifyRequest("GET", TokenKeyEndpoint),
 							ghttp.RespondWith(http.StatusOK, `{"alg":"alg", "value": "ooooppps }`),
 						),
 					)
@@ -127,7 +126,7 @@ var _ = Describe("Fetch Key", func() {
 				BeforeEach(func() {
 					server.AppendHandlers(
 						ghttp.CombineHandlers(
-							ghttp.VerifyRequest("GET", TOKEN_KEY_ENDPOINT),
+							ghttp.VerifyRequest("GET", TokenKeyEndpoint),
 							ghttp.RespondWith(http.StatusInternalServerError, `{}`),
 						),
 					)
