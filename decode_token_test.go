@@ -2,6 +2,7 @@ package uaa_go_client_test
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -282,81 +283,72 @@ var _ = Describe("DecodeToken", func() {
 					})
 				})
 
-				// Context("when new key applies to only one client and not others", func() {
-				// 	var (
-				// 		keyChannel    chan string
-				// 		resultChannel chan bool
-				// 	)
+				Context("when new key applies to only one client and not others", func() {
+					var (
+						keyChannel      chan string
+						expectErrorChan chan bool
+					)
 
-				// 	BeforeEach(func() {
-				// 		keyChannel = make(chan string)
-				// 		resultChannel = make(chan bool)
+					BeforeEach(func() {
+						keyChannel = make(chan string)
+						expectErrorChan = make(chan bool)
 
-				// 		f := func(w http.ResponseWriter, req *http.Request) {
-				// 			fmt.Println("Reading key .....")
-				// 			key := <-keyChannel
-				// 			fmt.Println("key Read.....")
+						successHandler := func(w http.ResponseWriter, req *http.Request) {
+							key := <-keyChannel
+							w.Write([]byte(fmt.Sprintf("{\"alg\":\"alg\", \"value\": \"%s\" }", key)))
+						}
 
-				// 			w.Write([]byte(fmt.Sprintf("{\"alg\":\"alg\", \"value\": \"%s\" }", key)))
-				// 			//	w.WriteHeader(http.StatusOK)
-				// 		}
-				// 		server.AppendHandlers(
-				// 			ghttp.CombineHandlers(
-				// 				f,
-				// 			),
-				// 			ghttp.CombineHandlers(
-				// 				f,
-				// 			),
-				// 			ghttp.CombineHandlers(
-				// 				f,
-				// 			),
-				// 		)
-				// 	})
+						failureHandler := func(w http.ResponseWriter, req *http.Request) {
+							w.WriteHeader(http.StatusInternalServerError)
+							w.Write([]byte(""))
+						}
 
-				// 	AfterEach(func() {
-				// 		close(keyChannel)
-				// 		close(resultChannel)
-				// 	})
+						server.AppendHandlers(
+							ghttp.CombineHandlers(
+								failureHandler,
+							),
+							ghttp.CombineHandlers(
+								successHandler,
+							),
+						)
+					})
 
-				// 	It("fetches new key and validates the token", func() {
-				// 		wg := sync.WaitGroup{}
-				// 		for i := 0; i < 2; i++ {
-				// 			wg.Add(1)
-				// 			go func(wg *sync.WaitGroup) {
-				// 				defer GinkgoRecover()
-				// 				defer wg.Done()
-				// 				err := client.DecodeToken(signedKey, "route.advertise")
-				// 				select {
-				// 				case fail := <-resultChannel:
-				// 					if fail {
-				// 						Expect(err).To(HaveOccurred())
-				// 						verifyErrorType(err, jwt.ValidationErrorSignatureInvalid, "invalid signature")
-				// 					} else {
-				// 						Expect(err).NotTo(HaveOccurred())
-				// 					}
-				// 				}
-				// 			}(&wg)
-				// 		}
-				// 		fmt.Println("Sending invalid key")
-				// 		keyChannel <- InvalidPemPublicKey
-				// 		fmt.Println("Invalid key sent")
+					AfterEach(func() {
+						close(keyChannel)
+						close(expectErrorChan)
+					})
 
-				// 		fmt.Println("Sending valid key")
-				// 		keyChannel <- InvalidPemPublicKey
-				// 		fmt.Println("Valid key sent")
+					It("fetches new key and validates the token", func() {
+						wg := sync.WaitGroup{}
+						for i := 0; i < 2; i++ {
+							wg.Add(1)
+							go func(wg *sync.WaitGroup) {
+								defer GinkgoRecover()
+								defer wg.Done()
+								err := client.DecodeToken(signedKey, "route.advertise")
+								select {
+								case fail := <-expectErrorChan:
+									if fail {
+										Expect(err).To(HaveOccurred())
+										Expect(err.Error()).To(Equal("http-error-fetching-key"))
+									} else {
+										Expect(err).NotTo(HaveOccurred())
+									}
+								}
+							}(&wg)
+						}
+						// Error expected due to internal server error from UAA
+						expectErrorChan <- true
 
-				// 		resultChannel <- true
+						keyChannel <- ValidPemPublicKey
 
-				// 		fmt.Println("2. Sending valid key")
-				// 		keyChannel <- ValidPemPublicKey
-				// 		fmt.Println("2. Valid key sent")
+						// retrieved valid pem key from UAA, no error expected
+						expectErrorChan <- false
 
-				// 		resultChannel <- false
-
-				// 		wg.Wait()
-				// 		Expect(len(server.ReceivedRequests())).To(Equal(3))
-				// 	})
-				// })
+						wg.Wait()
+						Expect(len(server.ReceivedRequests())).To(Equal(2))
+					})
+				})
 			})
 		})
 
