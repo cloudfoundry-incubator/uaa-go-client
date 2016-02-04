@@ -6,8 +6,6 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"os"
-	"path"
 	"strings"
 	"time"
 
@@ -238,9 +236,8 @@ var _ = Describe("UAA Client", func() {
 })
 
 func newTlsListener(listener net.Listener) net.Listener {
-	basePath := path.Join(os.Getenv("GOPATH"), "src", "github.com", "cf-routing", "uaa-go-client", "fixtures")
-	public := path.Join(basePath, "server.pem")
-	private := path.Join(basePath, "server.key")
+	public := "fixtures/server.pem"
+	private := "fixtures/server.key"
 	cert, err := tls.LoadX509KeyPair(public, private)
 	Expect(err).ToNot(HaveOccurred())
 
