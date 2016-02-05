@@ -6,10 +6,11 @@ UAA Client for Go!
 # Example (non-TLS)
 
 ```
-cfg := &config.Config{}
-cfg.ClientName = "gorouter"
-cfg.ClientSecret = "gorouter-secret"
-cfg.UaaEndpoint = "http://uaa.service.cf.internal"
+cfg := &config.Config{
+	ClientName:       "gorouter",
+	ClientSecret:     "gorouter-secret",
+	UaaEndpoint:      "http://uaa.service.cf.internal",
+}
 
 
 tlsClient, err = client.NewClient(logger, cfg, clock)
@@ -33,12 +34,13 @@ fmt.Printf("Token: %#v\n", token)
 # Example (TLS)
 
 ```
-cfg := &config.Config{}
-cfg.ClientName = "gorouter"
-cfg.ClientSecret = "gorouter-secret"
-cfg.UaaEndpoint = "https://uaa.service.cf.internal:8443"
-cfg.UseHttps = true
-cfg.SkipVerification = true
+cfg := &config.Config{
+	ClientName:       "gorouter",
+	ClientSecret:     "gorouter-secret",
+	UaaEndpoint:      "https://uaa.service.cf.internal:8443",
+	UseHttps:         true,
+	SkipVerification: true,
+}
 
 tlsClient, err = client.NewClient(logger, cfg, clock)
 if err != nil {

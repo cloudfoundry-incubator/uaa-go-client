@@ -19,12 +19,13 @@ func main() {
 		token     *schema.Token
 	)
 
-	cfg := &config.Config{}
-	cfg.ClientName = "gorouter"
-	cfg.ClientSecret = "gorouter-secret"
-	cfg.UaaEndpoint = "https://uaa.service.cf.internal:8443"
-	cfg.UseHttps = true
-	cfg.SkipVerification = true
+	cfg := &config.Config{
+		ClientName:       "gorouter",
+		ClientSecret:     "gorouter-secret",
+		UaaEndpoint:      "https://uaa.service.cf.internal:8443",
+		UseHttps:         true,
+		SkipVerification: true,
+	}
 
 	logger := lager.NewLogger("test")
 	clock := clock.NewClock()
@@ -43,6 +44,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("Token: %#v\n", token)
+	fmt.Printf("Response:\n\ttoken: %s\n\texpires: %d\n", token.AccessToken, token.ExpiresIn)
 
 }
