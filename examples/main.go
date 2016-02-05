@@ -20,14 +20,15 @@ func main() {
 	)
 
 	cfg := &config.Config{}
-	cfg.ClientName = "client-name"
-	cfg.ClientSecret = "client-secret"
-	cfg.UaaEndpoint = "https://10.244.0.130:8443"
+	cfg.ClientName = "gorouter"
+	cfg.ClientSecret = "gorouter-secret"
+	cfg.UaaEndpoint = "https://uaa.service.cf.internal:8443"
 	cfg.UseHttps = true
-	cfg.SkipVerification = false
+	cfg.SkipVerification = true
 
 	logger := lager.NewLogger("test")
 	clock := clock.NewClock()
+
 	tlsClient, err = client.NewClient(logger, cfg, clock)
 	if err != nil {
 		log.Fatal(err)
@@ -35,6 +36,7 @@ func main() {
 	}
 
 	fmt.Printf("Connecting to: %s ...\n", cfg.UaaEndpoint)
+
 	token, err = tlsClient.FetchToken(true)
 	if err != nil {
 		log.Fatal(err)
