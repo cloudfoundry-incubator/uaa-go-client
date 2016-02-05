@@ -22,7 +22,7 @@ func main() {
 	cfg := &config.Config{}
 	cfg.ClientName = "client-name"
 	cfg.ClientSecret = "client-secret"
-	cfg.UaaEndpoint = "https://10.244.0.130"
+	cfg.UaaEndpoint = "https://10.244.0.130:8443"
 	cfg.UseHttps = true
 	cfg.SkipVerification = false
 
