@@ -47,28 +47,27 @@ type UaaClient struct {
 }
 
 func NewClient(logger lager.Logger, cfg *config.Config, clock clock.Clock) (*UaaClient, error) {
-	if cfg == nil {
-		return nil, errors.New("Configuration cannot be nil")
-	}
-
-	if cfg.ClientName == "" {
-		return nil, errors.New("OAuth Client ID cannot be empty")
-	}
-
-	if cfg.ClientSecret == "" {
-		return nil, errors.New("OAuth Client Secret cannot be empty")
-	}
-
-	if cfg.UaaEndpoint == "" {
-		return nil, errors.New("UAA endpoint cannot be empty")
-	}
 
 	var (
 		client *http.Client
 		err    error
+		uri    *url.URL
 	)
 
-	if cfg.UseHttps {
+	if cfg == nil {
+		return nil, errors.New("Configuration cannot be nil")
+	}
+
+	if err = cfg.Valid(); err != nil {
+		return nil, err
+	}
+
+	uri, err = url.Parse(cfg.UaaEndpoint)
+	if err != nil {
+		return nil, errors.New("UAA endpoint invalid")
+	}
+
+	if uri.Scheme == "https" {
 		client, err = newSecureClient(cfg)
 		if err != nil {
 			return nil, err

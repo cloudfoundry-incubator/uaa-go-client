@@ -167,7 +167,6 @@ var _ = Describe("UAA Client", func() {
 			listener, err := net.Listen("tcp", "127.0.0.1:0")
 			addr := strings.Split(listener.Addr().String(), ":")
 
-			cfg.UseHttps = true
 			cfg.UaaEndpoint = "https://" + addr[0] + ":" + addr[1]
 			Expect(err).NotTo(HaveOccurred())
 
