@@ -6,7 +6,7 @@ A go library for Cloud Foundry [UAA](https://github.com/cloudfoundry/uaa)
 
 ## Example
 This example client connects to UAA using https and skips cert verification.
-```
+```go
 cfg := &config.Config{
   ClientName:       "client-name",
 	ClientSecret:     "client-secret",
@@ -32,7 +32,7 @@ fmt.Printf("Token: %#v\n", token)
 ```
 
 ## Example command line
-This example client connects to UAA using https and skips cert verification.
+This example client connects to UAA using https, skips cert verification and fetches a token.
 
 ```
 Usage: <client-name> <client-secret> <uaa-url> <skip-verification>
