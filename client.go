@@ -2,6 +2,7 @@ package uaa_go_client
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"encoding/pem"
 	"errors"
@@ -20,7 +21,6 @@ import (
 
 	"github.com/cf-routing/uaa-go-client/config"
 	"github.com/cf-routing/uaa-go-client/schema"
-	"github.com/cloudfoundry-incubator/cf_http"
 )
 
 type uaaKey struct {
@@ -68,7 +68,7 @@ func NewClient(logger lager.Logger, cfg *config.Config, clock clock.Clock) (*Uaa
 		err    error
 	)
 
-	if cfg.TLSconfig != nil {
+	if cfg.UseHttps {
 		client, err = newSecureClient(cfg)
 		if err != nil {
 			return nil, err
@@ -92,13 +92,8 @@ func NewClient(logger lager.Logger, cfg *config.Config, clock clock.Clock) (*Uaa
 }
 
 func newSecureClient(cfg *config.Config) (*http.Client, error) {
-	tlsConfig, err := cf_http.NewTLSConfig(cfg.TLSconfig.CertFile, cfg.TLSconfig.KeyFile, cfg.TLSconfig.CaFile)
-	if err != nil {
-		return nil, err
-	}
-	tlsConfig.InsecureSkipVerify = cfg.TLSconfig.SkipVerification
 	tr := &http.Transport{
-		TLSClientConfig: tlsConfig,
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: cfg.SkipVerification},
 	}
 
 	client := &http.Client{Transport: tr}

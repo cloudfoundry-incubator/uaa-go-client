@@ -26,7 +26,7 @@ var _ = Describe("UAA Client", func() {
 		DefaultExpirationBufferTime = 30
 	)
 
-	Context("simple UAA client", func() {
+	Context("non-TLS client", func() {
 
 		BeforeEach(func() {
 			forceUpdate = false
@@ -150,12 +150,11 @@ var _ = Describe("UAA Client", func() {
 			})
 		})
 	})
-	Context(" Secure UAA client", func() {
+	Context("secure (TLS) client", func() {
 
 		var (
 			tlsServer   *http.Server
 			tlsListener net.Listener
-			tlsConfig   *config.TLSconfig
 		)
 		BeforeEach(func() {
 			forceUpdate = false
@@ -188,19 +187,14 @@ var _ = Describe("UAA Client", func() {
 			cfg.ClientName = "client-name"
 			cfg.ClientSecret = "client-secret"
 
-			tlsConfig = &config.TLSconfig{}
-			cfg.TLSconfig = tlsConfig
-
 			clock = fakeclock.NewFakeClock(time.Now())
 			logger = lagertest.NewTestLogger("test")
 		})
 
-		Context("when valid cert are used", func() {
+		Context("when insecure skip verify", func() {
 			BeforeEach(func() {
-				tlsConfig.CertFile = "fixtures/client.pem"
-				tlsConfig.KeyFile = "fixtures/client.key"
-				tlsConfig.CaFile = ""
-				tlsConfig.SkipVerification = true
+				cfg.UseHttps = true
+				cfg.SkipVerification = true
 			})
 			It("creates a secure client connection", func() {
 				var (
@@ -213,23 +207,6 @@ var _ = Describe("UAA Client", func() {
 
 				_, err = tlsClient.FetchKey()
 				Expect(err).ToNot(HaveOccurred())
-			})
-		})
-		Context("when invalid cert are used", func() {
-			BeforeEach(func() {
-				tlsConfig.CertFile = ""
-				tlsConfig.KeyFile = ""
-				tlsConfig.CaFile = ""
-				tlsConfig.SkipVerification = true
-			})
-			It("creates a secure client connection", func() {
-				var (
-					tlsClient *uaa_go_client.UaaClient
-					err       error
-				)
-				tlsClient, err = uaa_go_client.NewClient(logger, cfg, clock)
-				Expect(err).To(HaveOccurred())
-				Expect(tlsClient).To(BeNil())
 			})
 		})
 	})
