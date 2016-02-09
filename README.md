@@ -1,7 +1,10 @@
 [![Build Status](https://travis-ci.org/cloudfoundry-incubator/uaa-go-client.svg?branch=master)](https://travis-ci.org/cloudfoundry-incubator/uaa-go-client)
 
 # uaa-go-client
-A go library for Cloud Foundry [UAA](https://github.com/cloudfoundry/uaa)
+A go library for Cloud Foundry [UAA](https://github.com/cloudfoundry/uaa) that provides the following:
+- fetch access tokens (including ability to cache tokens)
+- decode tokens
+- get token signing key
 
 
 ## Example
