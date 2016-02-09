@@ -19,8 +19,8 @@ import (
 	"github.com/pivotal-golang/clock"
 	"github.com/pivotal-golang/lager"
 
-	"github.com/cf-routing/uaa-go-client/config"
-	"github.com/cf-routing/uaa-go-client/schema"
+	"github.com/cloudfoundry-incubator/uaa-go-client/config"
+	"github.com/cloudfoundry-incubator/uaa-go-client/schema"
 )
 
 type uaaKey struct {

@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cf-routing/uaa-go-client"
-	"github.com/cf-routing/uaa-go-client/config"
+	"github.com/cloudfoundry-incubator/uaa-go-client"
+	"github.com/cloudfoundry-incubator/uaa-go-client/config"
 	"github.com/cloudfoundry-incubator/routing-api/authentication/fakes"
 
 	"github.com/dgrijalva/jwt-go"

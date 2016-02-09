@@ -10,8 +10,8 @@ import (
 
 	"github.com/pivotal-golang/lager/lagertest"
 
-	"github.com/cf-routing/uaa-go-client"
-	"github.com/cf-routing/uaa-go-client/config"
+	"github.com/cloudfoundry-incubator/uaa-go-client"
+	"github.com/cloudfoundry-incubator/uaa-go-client/config"
 
 	"github.com/pivotal-golang/clock/fakeclock"
 

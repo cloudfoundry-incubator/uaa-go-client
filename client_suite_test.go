@@ -13,9 +13,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cf-routing/uaa-go-client"
-	"github.com/cf-routing/uaa-go-client/config"
-	"github.com/cf-routing/uaa-go-client/schema"
+	"github.com/cloudfoundry-incubator/uaa-go-client"
+	"github.com/cloudfoundry-incubator/uaa-go-client/config"
+	"github.com/cloudfoundry-incubator/uaa-go-client/schema"
 	"github.com/pivotal-golang/clock/fakeclock"
 
 	"github.com/onsi/gomega/gbytes"

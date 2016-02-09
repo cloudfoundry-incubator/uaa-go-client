@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/cf-routing/uaa-go-client",
+	"ImportPath": "github.com/cloudfoundry-incubator/uaa-go-client",
 	"GoVersion": "go1.5.3",
 	"Deps": [
 		{

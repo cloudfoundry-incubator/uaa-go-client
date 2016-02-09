@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/cf-routing/uaa-go-client.svg?branch=master)](https://travis-ci.org/cf-routing/uaa-go-client)
+[![Build Status](https://travis-ci.org/cloudfoundry-incubator/uaa-go-client.svg?branch=master)](https://travis-ci.org/cloudfoundry-incubator/uaa-go-client)
 
 # uaa-go-client
 A go library for Cloud Foundry [UAA](https://github.com/cloudfoundry/uaa)
