@@ -1,48 +1,18 @@
 {
 	"ImportPath": "github.com/cloudfoundry-incubator/uaa-go-client",
 	"GoVersion": "go1.5.3",
+	"Packages": [
+		"./..."
+	],
 	"Deps": [
-		{
-			"ImportPath": "github.com/cloudfoundry-incubator/cf_http",
-			"Rev": "a5d927ab077921e6a42f6fe3b0b9f6912f072e11"
-		},
-		{
-			"ImportPath": "github.com/cloudfoundry-incubator/routing-api/authentication",
-			"Rev": "964c5820b7701c644fd5b7c5311343746f37d77d"
-		},
-		{
-			"ImportPath": "github.com/cloudfoundry-incubator/routing-api/db",
-			"Rev": "964c5820b7701c644fd5b7c5311343746f37d77d"
-		},
-		{
-			"ImportPath": "github.com/cloudfoundry-incubator/routing-api/metrics",
-			"Rev": "964c5820b7701c644fd5b7c5311343746f37d77d"
-		},
 		{
 			"ImportPath": "github.com/cloudfoundry-incubator/trace-logger",
 			"Rev": "24964ef4dbb527a373d4db141cbbd41eb21a56f9"
 		},
 		{
-			"ImportPath": "github.com/cloudfoundry/gunk/workpool",
-			"Rev": "b84f305af4938293a45d4551be00fc4e70a2ce95"
-		},
-		{
-			"ImportPath": "github.com/cloudfoundry/storeadapter",
-			"Rev": "57139702b98a42708276747b53fb999a02f1342b"
-		},
-		{
-			"ImportPath": "github.com/coreos/go-etcd/etcd",
-			"Comment": "v2.0.0-38-g003851b",
-			"Rev": "003851be7bb0694fe3cc457a49529a19388ee7cf"
-		},
-		{
 			"ImportPath": "github.com/dgrijalva/jwt-go",
 			"Comment": "v2.3.0-6-gf62f64e",
 			"Rev": "f62f64ea222e5e6d6d86421b5507b0862a3ebf7f"
-		},
-		{
-			"ImportPath": "github.com/nu7hatch/gouuid",
-			"Rev": "179d4d0c4d8d407a32af483c2354df1d2c91e6c3"
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo",
@@ -61,10 +31,6 @@
 		{
 			"ImportPath": "github.com/pivotal-golang/lager",
 			"Rev": "95b2ada4cdf781bdcf07e5207879e034ac8c5314"
-		},
-		{
-			"ImportPath": "github.com/ugorji/go/codec",
-			"Rev": "646ae4a518c1c3be0739df898118d9bccf993858"
 		}
 	]
 }
