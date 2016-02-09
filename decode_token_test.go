@@ -11,7 +11,7 @@ import (
 
 	"github.com/cloudfoundry-incubator/uaa-go-client"
 	"github.com/cloudfoundry-incubator/uaa-go-client/config"
-	"github.com/cloudfoundry-incubator/routing-api/authentication/fakes"
+	"github.com/cloudfoundry-incubator/uaa-go-client/fakes"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/pivotal-golang/clock/fakeclock"
