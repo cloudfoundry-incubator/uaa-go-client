@@ -25,7 +25,7 @@ import (
 
 var _ = Describe("DecodeToken", func() {
 	var (
-		client            *uaa_go_client.UaaClient
+		client            uaa_go_client.Client
 		fakeSigningMethod *fakes.FakeSigningMethod
 		// fakeUaaKeyFetcher *fakes.FakeUaaKeyFetcher
 		signedKey      string

@@ -24,7 +24,7 @@ import (
 var _ = Describe("Fetch Key", func() {
 
 	var (
-		client *uaa_go_client.UaaClient
+		client uaa_go_client.Client
 		err    error
 		key    string
 	)

@@ -86,7 +86,7 @@ var getSuccessKeyFetchHandler = func(key string) http.HandlerFunc {
 	)
 }
 
-var verifyFetchWithRetries = func(client *uaa_go_client.UaaClient, server *ghttp.Server, numRetries int, expectedResponses ...string) {
+var verifyFetchWithRetries = func(client uaa_go_client.Client, server *ghttp.Server, numRetries int, expectedResponses ...string) {
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	go func(wg *sync.WaitGroup) {

@@ -9,10 +9,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cloudfoundry-incubator/trace-logger"
 	"github.com/cloudfoundry-incubator/uaa-go-client"
 	"github.com/cloudfoundry-incubator/uaa-go-client/config"
 	"github.com/cloudfoundry-incubator/uaa-go-client/schema"
-	"github.com/cloudfoundry-incubator/trace-logger"
 	"github.com/pivotal-golang/clock/fakeclock"
 	"github.com/pivotal-golang/lager/lagertest"
 
@@ -24,7 +24,7 @@ import (
 
 var _ = Describe("FetchToken", func() {
 	var (
-		client *uaa_go_client.UaaClient
+		client uaa_go_client.Client
 	)
 
 	BeforeEach(func() {

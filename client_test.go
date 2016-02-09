@@ -197,7 +197,7 @@ var _ = Describe("UAA Client", func() {
 			})
 			It("creates a secure client connection", func() {
 				var (
-					tlsClient *uaa_go_client.UaaClient
+					tlsClient uaa_go_client.Client
 					err       error
 				)
 				tlsClient, err = uaa_go_client.NewClient(logger, cfg, clock)
