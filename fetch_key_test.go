@@ -75,9 +75,9 @@ var _ = Describe("Fetch Key", func() {
 						),
 					)
 				})
-				It("does not return an error", func() {
-					Expect(err).NotTo(HaveOccurred())
-					Expect(key).NotTo(BeNil())
+				It("does return an error", func() {
+					Expect(err).To(HaveOccurred())
+					Expect(key).To(BeEmpty())
 				})
 			})
 
@@ -119,6 +119,26 @@ var _ = Describe("Fetch Key", func() {
 
 				It("logs error message", func() {
 					Expect(logger).Should(gbytes.Say("error-in-unmarshaling-key"))
+				})
+			})
+
+			Context("and returns a invalid pem key", func() {
+				BeforeEach(func() {
+					server.AppendHandlers(
+						ghttp.CombineHandlers(
+							ghttp.VerifyRequest("GET", TokenKeyEndpoint),
+							ghttp.RespondWith(http.StatusOK, `{"alg":"alg", "value": "not-valid-pem" }`),
+						),
+					)
+				})
+
+				It("returns the error", func() {
+					Expect(err).To(HaveOccurred())
+					Expect(key).To(BeEmpty())
+				})
+
+				It("logs error message", func() {
+					Expect(logger).Should(gbytes.Say("error-not-valid-pem-key"))
 				})
 			})
 

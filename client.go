@@ -212,6 +212,7 @@ func (u *UaaClient) FetchKey() (string, error) {
 	logger.Info("fetch-key-successful")
 
 	if checkPublicKey(uaaKey.Value) != nil {
+		err = errors.New("error-not-valid-pem-key")
 		logger.Error("error-not-valid-pem-key", err)
 		return "", err
 	}
