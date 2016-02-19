@@ -75,30 +75,28 @@ var _ = Describe("UAA Client", func() {
 				})
 
 				Context("when oauth config client id is empty", func() {
-					It("returns error", func() {
+					It("creates new client", func() {
 						config := &config.Config{
 							UaaEndpoint:  "http://some.url:80",
 							ClientName:   "",
 							ClientSecret: "client-secret",
 						}
 						client, err := uaa_go_client.NewClient(logger, config, clock)
-						Expect(err).To(HaveOccurred())
-						Expect(err.Error()).To(ContainSubstring("OAuth Client ID cannot be empty"))
-						Expect(client).To(BeNil())
+						Expect(err).ToNot(HaveOccurred())
+						Expect(client).ToNot(BeNil())
 					})
 				})
 
 				Context("when oauth config client secret is empty", func() {
-					It("returns error", func() {
+					It("creates a new client", func() {
 						config := &config.Config{
 							UaaEndpoint:  "http://some.url:80",
 							ClientName:   "client-name",
 							ClientSecret: "",
 						}
 						client, err := uaa_go_client.NewClient(logger, config, clock)
-						Expect(err).To(HaveOccurred())
-						Expect(err.Error()).To(ContainSubstring("OAuth Client Secret cannot be empty"))
-						Expect(client).To(BeNil())
+						Expect(err).ToNot(HaveOccurred())
+						Expect(client).ToNot(BeNil())
 					})
 				})
 
