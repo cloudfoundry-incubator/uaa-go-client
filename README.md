@@ -35,14 +35,14 @@ fmt.Printf("Token: %#v\n", token)
 ```
 
 ## Example command line
-This example client connects to UAA using https, skips cert verification and fetches a token.
+This example client connects to UAA using https, skips cert verification and fetches a token (Note. UAA has to be configured to listen on TLS port in order for this example to work).
 
 ```
 Usage: <client-name> <client-secret> <uaa-url> <skip-verification>
 ```
 
 ```
-$ go run examples/main.go gorouter gorouter-secret https://uaa.service.cf.internal:8443 true
+$ go run examples/main.go gorouter gorouter-secret https://10.244.0.134:8443 true
 
 Connecting to: https://uaa.service.cf.internal:8443 ...
 Response:
