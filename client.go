@@ -47,7 +47,7 @@ type UaaClient struct {
 }
 
 func NewClient(logger lager.Logger, cfg *config.Config, clock clock.Clock) (Client, error) {
-
+	logger.Session("uaa-client")
 	var (
 		client *http.Client
 		err    error
@@ -96,6 +96,7 @@ func newSecureClient(cfg *config.Config) (*http.Client, error) {
 }
 
 func (u *UaaClient) FetchToken(forceUpdate bool) (*schema.Token, error) {
+	u.logger.Session("uaa-client")
 	u.logger.Debug("fetching-token", lager.Data{"force-update": forceUpdate})
 
 	if err := u.config.CheckCredentials(); err != nil {
@@ -184,7 +185,7 @@ func (u *UaaClient) doFetch() (*schema.Token, bool, error) {
 }
 
 func (u *UaaClient) FetchKey() (string, error) {
-	logger := u.logger.Session("uaa-key-fetcher")
+	logger := u.logger.Session("uaa-client")
 	logger.Info("fetch-key-started")
 	defer logger.Info("fetch-key-completed")
 	getKeyUrl := fmt.Sprintf("%s/token_key", u.config.UaaEndpoint)

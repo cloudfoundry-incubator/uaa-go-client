@@ -16,6 +16,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/ghttp"
 )
 
@@ -204,6 +205,7 @@ var _ = Describe("UAA Client", func() {
 
 				_, err = tlsClient.FetchKey()
 				Expect(err).ToNot(HaveOccurred())
+				Expect(logger).To(gbytes.Say("uaa-client"))
 			})
 		})
 	})
