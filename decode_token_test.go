@@ -118,7 +118,17 @@ var _ = Describe("DecodeToken", func() {
 
 				server.AppendHandlers(
 					getSuccessKeyFetchHandler(ValidPemPublicKey),
+					getSuccessKeyFetchHandler(ValidPemPublicKey),
 				)
+			})
+
+			It("caches the UAA public key", func() {
+				err := client.DecodeToken("bearer "+signedKey, "route.advertise")
+				Expect(err).NotTo(HaveOccurred())
+				err = client.DecodeToken("bearer "+signedKey, "route.advertise")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(len(server.ReceivedRequests())).To(Equal(1))
 			})
 
 			It("does not return an error", func() {
@@ -243,7 +253,7 @@ var _ = Describe("DecodeToken", func() {
 				signedKey = "bearer " + signedKey
 			})
 
-			Context("something", func() {
+			Context("when a successful fetch happens", func() {
 				BeforeEach(func() {
 					server.AppendHandlers(
 						getSuccessKeyFetchHandler(InvalidPemPublicKey),

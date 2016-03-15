@@ -217,6 +217,10 @@ func (u *UaaClient) FetchKey() (string, error) {
 		return "", err
 	}
 
+	u.rwlock.Lock()
+	defer u.rwlock.Unlock()
+	u.uaaPublicKey = uaaKey.Value
+
 	return uaaKey.Value, nil
 }
 
@@ -244,8 +248,8 @@ func (u *UaaClient) DecodeToken(uaaToken string, desiredPermissions ...string) e
 			})
 
 			if err != nil {
+				logger.Error("decode-failed", err)
 				if matchesError(err, jwt.ValidationErrorSignatureInvalid) {
-					logger.Info("invalid-signature")
 					forceUaaKeyFetch = true
 					continue
 				}
@@ -327,19 +331,13 @@ func (u *UaaClient) getUaaTokenKey(logger lager.Logger, forceFetch bool) (string
 		if err != nil {
 			return key, err
 		}
-		err = checkPublicKey(key)
-		if err != nil {
-			return "", err
-		}
+
 		if u.getUaaPublicKey() == key {
 			logger.Info("Fetched the same verification key from UAA")
 		} else {
 			logger.Info("Fetched a different verification key from UAA")
 		}
-		u.rwlock.Lock()
-		defer u.rwlock.Unlock()
-		u.uaaPublicKey = key
-		return u.uaaPublicKey, nil
+		return key, nil
 	}
 
 	return u.getUaaPublicKey(), nil
