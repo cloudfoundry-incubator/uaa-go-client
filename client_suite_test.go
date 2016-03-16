@@ -86,13 +86,14 @@ var getSuccessKeyFetchHandler = func(key string) http.HandlerFunc {
 	)
 }
 
-var verifyFetchWithRetries = func(client uaa_go_client.Client, server *ghttp.Server, numRetries int, expectedResponses ...string) {
+var verifyFetchWithRetries = func(client uaa_go_client.Client, server *ghttp.Server, numRetries int, expectedErrorMsg string) {
+	var err error
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	go func(wg *sync.WaitGroup) {
 		defer GinkgoRecover()
 		defer wg.Done()
-		_, err := client.FetchToken(forceUpdate)
+		_, err = client.FetchToken(forceUpdate)
 		Expect(err).To(HaveOccurred())
 	}(&wg)
 
@@ -101,9 +102,7 @@ var verifyFetchWithRetries = func(client uaa_go_client.Client, server *ghttp.Ser
 		clock.Increment(DefaultRetryInterval + 10*time.Second)
 	}
 
-	for _, respMessage := range expectedResponses {
-		Expect(logger).To(gbytes.Say(respMessage))
-	}
-
 	wg.Wait()
+
+	Expect(err.Error()).To(ContainSubstring(expectedErrorMsg))
 }

@@ -17,7 +17,6 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/ghttp"
 )
 
@@ -96,10 +95,6 @@ var _ = Describe("Fetch Key", func() {
 					Expect(key).NotTo(BeNil())
 					Expect(key).Should(Equal(PemDecodedKey))
 				})
-
-				It("logs success message", func() {
-					Expect(logger).Should(gbytes.Say("fetch-key-successful"))
-				})
 			})
 
 			Context("and returns a invalid json uaa key", func() {
@@ -114,11 +109,8 @@ var _ = Describe("Fetch Key", func() {
 
 				It("returns the error", func() {
 					Expect(err).To(HaveOccurred())
+					Expect(err).Should(Equal(errors.New("unmarshalling error: unexpected EOF")))
 					Expect(key).To(BeEmpty())
-				})
-
-				It("logs error message", func() {
-					Expect(logger).Should(gbytes.Say("error-in-unmarshaling-key"))
 				})
 			})
 
@@ -134,11 +126,8 @@ var _ = Describe("Fetch Key", func() {
 
 				It("returns the error", func() {
 					Expect(err).To(HaveOccurred())
+					Expect(err.Error()).To(ContainSubstring(("must be PEM encoded")))
 					Expect(key).To(BeEmpty())
-				})
-
-				It("logs error message", func() {
-					Expect(logger).Should(gbytes.Say("error-not-valid-pem-key"))
 				})
 			})
 
@@ -157,15 +146,10 @@ var _ = Describe("Fetch Key", func() {
 					Expect(err).Should(Equal(errors.New("http-error-fetching-key")))
 					Expect(key).To(BeEmpty())
 				})
-
-				It("logs error message", func() {
-					Expect(logger).Should(gbytes.Say("http-error-fetching-key"))
-				})
 			})
 		})
 
 		Context("when UAA is unavailable", func() {
-
 			BeforeEach(func() {
 				cfg.UaaEndpoint = "http://127.0.0.1:1111"
 				client, err = uaa_go_client.NewClient(logger, cfg, clock)
@@ -174,11 +158,8 @@ var _ = Describe("Fetch Key", func() {
 
 			It("returns the error", func() {
 				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).Should(ContainSubstring("connection refused"))
 				Expect(key).To(BeEmpty())
-			})
-
-			It("logs error message", func() {
-				Expect(logger).Should(gbytes.Say("error-in-fetching-key"))
 			})
 		})
 	})

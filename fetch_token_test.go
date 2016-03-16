@@ -140,7 +140,7 @@ var _ = Describe("FetchToken", func() {
 					}(&wg)
 
 					for i := 0; i < DefaultMaxNumberOfRetries; i++ {
-						Eventually(logger).Should(gbytes.Say("test.http-request.*bogus.url"))
+						Eventually(logger).Should(gbytes.Say("test.sending-request.*bogus.url"))
 						Eventually(logger).Should(gbytes.Say("test.error-fetching-token"))
 						clock.Increment(DefaultRetryInterval + 10*time.Second)
 					}
@@ -159,7 +159,6 @@ var _ = Describe("FetchToken", func() {
 						Expect(err).To(HaveOccurred())
 						Expect(err.Error()).To(Equal("status code: 400, body: you messed up"))
 						Expect(server.ReceivedRequests()).Should(HaveLen(1))
-						verifyLogs("test.http-request.*/oauth/token", "test.http-response.*400")
 					})
 				})
 
@@ -174,7 +173,7 @@ var _ = Describe("FetchToken", func() {
 					})
 
 					It("retries a number of times and finally returns an error", func() {
-						verifyFetchWithRetries(client, server, DefaultMaxNumberOfRetries, "test.http-response.*503", "test.http-response.*500", "test.http-response.*502")
+						verifyFetchWithRetries(client, server, DefaultMaxNumberOfRetries, "status code: 404")
 					})
 				})
 
@@ -188,7 +187,6 @@ var _ = Describe("FetchToken", func() {
 						Expect(err).To(HaveOccurred())
 						Expect(err.Error()).To(Equal("status code: 301, body: moved"))
 						Expect(server.ReceivedRequests()).Should(HaveLen(1))
-						verifyLogs("test.http-request.*/oauth/token", "test.http-response.*301")
 					})
 				})
 
@@ -200,8 +198,8 @@ var _ = Describe("FetchToken", func() {
 						)
 					})
 
-					It("retries until it hits 3XX status code and  returns an error", func() {
-						verifyFetchWithRetries(client, server, 2, "test.http-response.*503", "test.http-response.*301")
+					It("retries until it hits 3XX status code and returns an error", func() {
+						verifyFetchWithRetries(client, server, 2, "status code: 301")
 					})
 				})
 			})
