@@ -96,8 +96,8 @@ func newSecureClient(cfg *config.Config) (*http.Client, error) {
 }
 
 func (u *UaaClient) FetchToken(forceUpdate bool) (*schema.Token, error) {
-	u.logger.Session("uaa-client")
-	u.logger.Debug("fetching-token", lager.Data{"force-update": forceUpdate})
+	logger := u.logger.Session("uaa-client")
+	logger.Info("started-fetching-token", lager.Data{"force-update": forceUpdate})
 
 	if err := u.config.CheckCredentials(); err != nil {
 		return nil, err
@@ -107,7 +107,7 @@ func (u *UaaClient) FetchToken(forceUpdate bool) (*schema.Token, error) {
 	defer u.lock.Unlock()
 
 	if !forceUpdate && u.canReturnCachedToken() {
-		u.logger.Debug("return-cached-token")
+		logger.Debug("return-cached-token")
 		return u.cachedToken, nil
 	}
 
@@ -118,16 +118,15 @@ func (u *UaaClient) FetchToken(forceUpdate bool) (*schema.Token, error) {
 	for retry == true {
 		token, retry, err = u.doFetchToken()
 		if token != nil {
-			u.logger.Debug("successfully-fetched-token")
 			break
 		}
 
 		if err != nil {
-			u.logger.Error("error-fetching-token", err)
+			logger.Error("error-fetching-token", err)
 		}
 
 		if retry && retryCount < u.config.MaxNumberOfRetries {
-			u.logger.Debug("retry-fetching-token", lager.Data{"retry-count": retryCount})
+			logger.Debug("retry-fetching-token", lager.Data{"retry-count": retryCount})
 			retryCount++
 			u.clock.Sleep(u.config.RetryInterval)
 			continue
@@ -136,6 +135,7 @@ func (u *UaaClient) FetchToken(forceUpdate bool) (*schema.Token, error) {
 		}
 	}
 
+	logger.Info("successfully-fetched-token")
 	u.updateCachedToken(token)
 	return token, nil
 }
