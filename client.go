@@ -218,6 +218,7 @@ func (u *UaaClient) FetchKey() (string, error) {
 	defer u.rwlock.Unlock()
 	u.uaaPublicKey = uaaKey.Value
 
+	logger.Info("fetch-key-successful")
 	return uaaKey.Value, nil
 }
 

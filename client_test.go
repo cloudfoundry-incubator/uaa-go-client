@@ -206,6 +206,8 @@ var _ = Describe("UAA Client", func() {
 				_, err = tlsClient.FetchKey()
 				Expect(err).ToNot(HaveOccurred())
 				Expect(logger).To(gbytes.Say("uaa-client"))
+				Expect(logger).To(gbytes.Say("fetch-key-starting"))
+				Expect(logger).To(gbytes.Say("fetch-key-successful"))
 			})
 		})
 	})
