@@ -107,7 +107,7 @@ func (u *UaaClient) FetchToken(forceUpdate bool) (*schema.Token, error) {
 	defer u.lock.Unlock()
 
 	if !forceUpdate && u.canReturnCachedToken() {
-		logger.Debug("return-cached-token")
+		logger.Info("using-cached-token")
 		return u.cachedToken, nil
 	}
 
