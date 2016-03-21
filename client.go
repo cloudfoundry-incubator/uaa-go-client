@@ -97,7 +97,8 @@ func newSecureClient(cfg *config.Config) (*http.Client, error) {
 
 func (u *UaaClient) FetchToken(forceUpdate bool) (*schema.Token, error) {
 	logger := u.logger.Session("uaa-client")
-	logger.Info("started-fetching-token", lager.Data{"force-update": forceUpdate})
+	tokenURL := fmt.Sprintf("%s/oauth/token", u.config.UaaEndpoint)
+	logger.Info("started-fetching-token", lager.Data{"endpoint": tokenURL, "force-update": forceUpdate})
 
 	if err := u.config.CheckCredentials(); err != nil {
 		return nil, err

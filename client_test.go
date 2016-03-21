@@ -190,49 +190,34 @@ var _ = Describe("UAA Client", func() {
 			logger = lagertest.NewTestLogger("test")
 		})
 
-		Context("when insecure skip verify", func() {
+		Context("when secure uaa client skips verify", func() {
+			var (
+				tlsClient uaa_go_client.Client
+			)
+
 			BeforeEach(func() {
 				cfg.SkipVerification = true
-			})
-			It("creates a secure client connection", func() {
-				var (
-					tlsClient uaa_go_client.Client
-					err       error
-				)
+				var err error
 				tlsClient, err = uaa_go_client.NewClient(logger, cfg, clock)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(tlsClient).ToNot(BeNil())
 			})
 
-			It("fetches token", func() {
-				var (
-					tlsClient uaa_go_client.Client
-					err       error
-				)
-				tlsClient, err = uaa_go_client.NewClient(logger, cfg, clock)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(tlsClient).ToNot(BeNil())
-
-				_, err = tlsClient.FetchToken(true)
+			It("logs fetching token", func() {
+				_, err := tlsClient.FetchToken(true)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(logger).To(gbytes.Say("uaa-client"))
 				Expect(logger).To(gbytes.Say("started-fetching-token"))
+				Expect(logger).To(gbytes.Say(cfg.UaaEndpoint))
 				Expect(logger).To(gbytes.Say("successfully-fetched-token"))
 			})
 
-			It("fetches key", func() {
-				var (
-					tlsClient uaa_go_client.Client
-					err       error
-				)
-				tlsClient, err = uaa_go_client.NewClient(logger, cfg, clock)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(tlsClient).ToNot(BeNil())
-
-				_, err = tlsClient.FetchKey()
+			It("logs fetching key", func() {
+				_, err := tlsClient.FetchKey()
 				Expect(err).ToNot(HaveOccurred())
 				Expect(logger).To(gbytes.Say("uaa-client"))
 				Expect(logger).To(gbytes.Say("fetch-key-starting"))
+				Expect(logger).To(gbytes.Say(cfg.UaaEndpoint))
 				Expect(logger).To(gbytes.Say("fetch-key-successful"))
 			})
 		})
