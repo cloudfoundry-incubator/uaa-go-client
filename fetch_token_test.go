@@ -141,7 +141,7 @@ var _ = Describe("FetchToken", func() {
 
 					for i := 0; i < DefaultMaxNumberOfRetries; i++ {
 						Eventually(logger).Should(gbytes.Say("test.sending-request.*bogus.url"))
-						Eventually(logger).Should(gbytes.Say("test.error-fetching-token"))
+						Eventually(logger).Should(gbytes.Say("error-fetching-token"))
 						clock.Increment(DefaultRetryInterval + 10*time.Second)
 					}
 					wg.Wait()
