@@ -2,10 +2,8 @@
 
 set -e -u -x
 
-go vet ./...
+$(dirname $0)/godep-env
 
 go install -v github.com/onsi/ginkgo/ginkgo
-
-export PATH=$GOPATH/bin:$PATH
 
 ginkgo -r -failOnPending -randomizeAllSpecs -race "$@"
