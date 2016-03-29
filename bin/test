@@ -2,7 +2,7 @@
 
 set -e -u -x
 
-$(dirname $0)/godep-env
+. $(dirname $0)/godep-env
 
 go install -v github.com/onsi/ginkgo/ginkgo
 
