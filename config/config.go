@@ -14,6 +14,7 @@ type Config struct {
 	UaaEndpoint           string `yaml:"uaa_endpoint"`
 	ClientName            string `yaml:"client_name"`
 	ClientSecret          string `yaml:"client_secret"`
+	CACerts               string `yaml:"ca_certs"`
 	MaxNumberOfRetries    uint32
 	RetryInterval         time.Duration
 	ExpirationBufferInSec int64

@@ -6,6 +6,9 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"os"
+	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -21,12 +24,6 @@ import (
 )
 
 var _ = Describe("UAA Client", func() {
-	const (
-		DefaultMaxNumberOfRetries   = 3
-		DefaultRetryInterval        = 15 * time.Second
-		DefaultExpirationBufferTime = 30
-	)
-
 	Context("non-TLS client", func() {
 
 		BeforeEach(func() {
@@ -188,6 +185,27 @@ var _ = Describe("UAA Client", func() {
 
 			clock = fakeclock.NewFakeClock(time.Now())
 			logger = lagertest.NewTestLogger("test")
+		})
+
+		Context("when CA cert provided", func() {
+			var (
+				tlsClient uaa_go_client.Client
+			)
+
+			BeforeEach(func() {
+				var err error
+				var basePath = path.Join(os.Getenv("GOPATH"), "src", "github.com", "cloudfoundry-incubator", "uaa-go-client", "fixtures")
+				cfg.CACerts = filepath.Join(basePath, "ca.pem")
+				cfg.MaxNumberOfRetries = 0
+				tlsClient, err = uaa_go_client.NewClient(logger, cfg, clock)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(tlsClient).ToNot(BeNil())
+			})
+
+			It("can make uaa request with cert", func() {
+				_, err := tlsClient.FetchToken(true)
+				Expect(err).ToNot(HaveOccurred())
+			})
 		})
 
 		Context("when secure uaa client skips verify", func() {

@@ -3,6 +3,7 @@ package uaa_go_client
 import (
 	"bytes"
 	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"encoding/pem"
 	"errors"
@@ -87,8 +88,22 @@ func NewClient(logger lager.Logger, cfg *config.Config, clock clock.Clock) (Clie
 }
 
 func newSecureClient(cfg *config.Config) (*http.Client, error) {
+	tlsConfig := &tls.Config{InsecureSkipVerify: cfg.SkipVerification}
+	if cfg.CACerts != "" {
+		certBytes, err := ioutil.ReadFile(cfg.CACerts)
+		if err != nil {
+			return nil, fmt.Errorf("failed read ca cert file: %s", err.Error())
+		}
+
+		caCertPool := x509.NewCertPool()
+		if ok := caCertPool.AppendCertsFromPEM(certBytes); !ok {
+			return nil, errors.New("Unable to load caCert")
+		}
+		tlsConfig.RootCAs = caCertPool
+	}
+
 	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: cfg.SkipVerification},
+		TLSClientConfig: tlsConfig,
 	}
 
 	client := &http.Client{Transport: tr}
