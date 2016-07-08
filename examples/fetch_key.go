@@ -8,8 +8,8 @@ import (
 
 	client "github.com/cloudfoundry-incubator/uaa-go-client"
 	"github.com/cloudfoundry-incubator/uaa-go-client/config"
-	"github.com/pivotal-golang/clock"
-	"github.com/pivotal-golang/lager"
+	"code.cloudfoundry.org/clock"
+	"code.cloudfoundry.org/lager"
 )
 
 func main() {

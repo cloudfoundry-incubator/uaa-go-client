@@ -16,11 +16,11 @@ import (
 	"github.com/cloudfoundry-incubator/uaa-go-client"
 	"github.com/cloudfoundry-incubator/uaa-go-client/config"
 	"github.com/cloudfoundry-incubator/uaa-go-client/schema"
-	"github.com/pivotal-golang/clock/fakeclock"
+	"code.cloudfoundry.org/clock/fakeclock"
 
 	"github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/ghttp"
-	"github.com/pivotal-golang/lager"
+	"code.cloudfoundry.org/lager"
 )
 
 func TestClient(t *testing.T) {
