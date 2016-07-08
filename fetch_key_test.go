@@ -8,12 +8,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pivotal-golang/lager/lagertest"
+	"code.cloudfoundry.org/lager/lagertest"
 
 	"github.com/cloudfoundry-incubator/uaa-go-client"
 	"github.com/cloudfoundry-incubator/uaa-go-client/config"
 
-	"github.com/pivotal-golang/clock/fakeclock"
+	"code.cloudfoundry.org/clock/fakeclock"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
