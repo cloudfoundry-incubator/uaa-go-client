@@ -34,6 +34,17 @@ type FakeClient struct {
 	decodeTokenReturns struct {
 		result1 error
 	}
+	RegisterOauthClientStub        func(*schema.OauthClient) (*schema.OauthClient, error)
+	registerOauthClientMutex       sync.RWMutex
+	registerOauthClientArgsForCall []struct {
+		arg1 *schema.OauthClient
+	}
+	registerOauthClientReturns struct {
+		result1 *schema.OauthClient
+		result2 error
+	}
+	invocations      map[string][][]interface{}
+	invocationsMutex sync.RWMutex
 }
 
 func (fake *FakeClient) FetchToken(forceUpdate bool) (*schema.Token, error) {
@@ -41,6 +52,7 @@ func (fake *FakeClient) FetchToken(forceUpdate bool) (*schema.Token, error) {
 	fake.fetchTokenArgsForCall = append(fake.fetchTokenArgsForCall, struct {
 		forceUpdate bool
 	}{forceUpdate})
+	fake.recordInvocation("FetchToken", []interface{}{forceUpdate})
 	fake.fetchTokenMutex.Unlock()
 	if fake.FetchTokenStub != nil {
 		return fake.FetchTokenStub(forceUpdate)
@@ -72,6 +84,7 @@ func (fake *FakeClient) FetchTokenReturns(result1 *schema.Token, result2 error) 
 func (fake *FakeClient) FetchKey() (string, error) {
 	fake.fetchKeyMutex.Lock()
 	fake.fetchKeyArgsForCall = append(fake.fetchKeyArgsForCall, struct{}{})
+	fake.recordInvocation("FetchKey", []interface{}{})
 	fake.fetchKeyMutex.Unlock()
 	if fake.FetchKeyStub != nil {
 		return fake.FetchKeyStub()
@@ -100,6 +113,7 @@ func (fake *FakeClient) DecodeToken(uaaToken string, desiredPermissions ...strin
 		uaaToken           string
 		desiredPermissions []string
 	}{uaaToken, desiredPermissions})
+	fake.recordInvocation("DecodeToken", []interface{}{uaaToken, desiredPermissions})
 	fake.decodeTokenMutex.Unlock()
 	if fake.DecodeTokenStub != nil {
 		return fake.DecodeTokenStub(uaaToken, desiredPermissions...)
@@ -125,6 +139,66 @@ func (fake *FakeClient) DecodeTokenReturns(result1 error) {
 	fake.decodeTokenReturns = struct {
 		result1 error
 	}{result1}
+}
+
+func (fake *FakeClient) RegisterOauthClient(arg1 *schema.OauthClient) (*schema.OauthClient, error) {
+	fake.registerOauthClientMutex.Lock()
+	fake.registerOauthClientArgsForCall = append(fake.registerOauthClientArgsForCall, struct {
+		arg1 *schema.OauthClient
+	}{arg1})
+	fake.recordInvocation("RegisterOauthClient", []interface{}{arg1})
+	fake.registerOauthClientMutex.Unlock()
+	if fake.RegisterOauthClientStub != nil {
+		return fake.RegisterOauthClientStub(arg1)
+	} else {
+		return fake.registerOauthClientReturns.result1, fake.registerOauthClientReturns.result2
+	}
+}
+
+func (fake *FakeClient) RegisterOauthClientCallCount() int {
+	fake.registerOauthClientMutex.RLock()
+	defer fake.registerOauthClientMutex.RUnlock()
+	return len(fake.registerOauthClientArgsForCall)
+}
+
+func (fake *FakeClient) RegisterOauthClientArgsForCall(i int) *schema.OauthClient {
+	fake.registerOauthClientMutex.RLock()
+	defer fake.registerOauthClientMutex.RUnlock()
+	return fake.registerOauthClientArgsForCall[i].arg1
+}
+
+func (fake *FakeClient) RegisterOauthClientReturns(result1 *schema.OauthClient, result2 error) {
+	fake.RegisterOauthClientStub = nil
+	fake.registerOauthClientReturns = struct {
+		result1 *schema.OauthClient
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeClient) Invocations() map[string][][]interface{} {
+	fake.invocationsMutex.RLock()
+	defer fake.invocationsMutex.RUnlock()
+	fake.fetchTokenMutex.RLock()
+	defer fake.fetchTokenMutex.RUnlock()
+	fake.fetchKeyMutex.RLock()
+	defer fake.fetchKeyMutex.RUnlock()
+	fake.decodeTokenMutex.RLock()
+	defer fake.decodeTokenMutex.RUnlock()
+	fake.registerOauthClientMutex.RLock()
+	defer fake.registerOauthClientMutex.RUnlock()
+	return fake.invocations
+}
+
+func (fake *FakeClient) recordInvocation(key string, args []interface{}) {
+	fake.invocationsMutex.Lock()
+	defer fake.invocationsMutex.Unlock()
+	if fake.invocations == nil {
+		fake.invocations = map[string][][]interface{}{}
+	}
+	if fake.invocations[key] == nil {
+		fake.invocations[key] = [][]interface{}{}
+	}
+	fake.invocations[key] = append(fake.invocations[key], args)
 }
 
 var _ uaa_go_client.Client = new(FakeClient)

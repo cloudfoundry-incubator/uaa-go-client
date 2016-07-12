@@ -24,6 +24,8 @@ import (
 	"github.com/cloudfoundry-incubator/uaa-go-client/schema"
 )
 
+var ErrClientAlreadyExists = errors.New("Client already exists")
+
 type uaaKey struct {
 	Alg   string `json:"alg"`
 	Value string `json:"value"`
@@ -33,6 +35,7 @@ type Client interface {
 	FetchToken(forceUpdate bool) (*schema.Token, error)
 	FetchKey() (string, error)
 	DecodeToken(uaaToken string, desiredPermissions ...string) error
+	RegisterOauthClient(*schema.OauthClient) (*schema.OauthClient, error)
 }
 
 type UaaClient struct {
@@ -298,6 +301,50 @@ func (u *UaaClient) DecodeToken(uaaToken string, desiredPermissions ...string) e
 	}
 
 	return nil
+}
+
+func (u *UaaClient) RegisterOauthClient(oauthClient *schema.OauthClient) (*schema.OauthClient, error) {
+	token, err := u.FetchToken(false)
+	if err != nil {
+		return nil, err
+	}
+
+	clientsUrl := fmt.Sprintf("%s/oauth/clients", u.config.UaaEndpoint)
+	bodyBytes, err := json.Marshal(oauthClient)
+	request, err := http.NewRequest("POST", clientsUrl, bytes.NewBuffer(bodyBytes))
+	request.Header.Add("Content-Type", "application/json; charset=UTF-8")
+	request.Header.Add("Accept", "application/json; charset=utf-8")
+	request.Header.Add("Authorization", "bearer " + token.AccessToken)
+
+	response, err := u.client.Do(request)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if response.StatusCode == http.StatusConflict {
+		return nil, ErrClientAlreadyExists
+	}
+
+	if response.StatusCode != http.StatusOK {
+		return nil, err
+	}
+
+	body, err := ioutil.ReadAll(response.Body)
+
+	if err != nil {
+		return nil, err
+	}
+
+	returnedOauthClient := &schema.OauthClient{}
+
+	err = json.Unmarshal(body, returnedOauthClient)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return returnedOauthClient, nil
 }
 
 func (u *UaaClient) canReturnCachedToken() bool {

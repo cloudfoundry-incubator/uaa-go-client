@@ -5,6 +5,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/cloudfoundry-incubator/uaa-go-client/schema"
 )
 
 var _ = Describe("NoopUaaClient", func() {
@@ -48,6 +49,14 @@ var _ = Describe("NoopUaaClient", func() {
 		It("returns an empty decode", func() {
 			decoded := client.DecodeToken("some token", "some perm")
 			Expect(decoded).To(BeNil())
+		})
+	})
+
+	Context("RegisterOauthClient", func() {
+		It("returns the given oauthClient", func() {
+			oauthClient := &schema.OauthClient{}
+			returnedOauthClient, _ := client.RegisterOauthClient(oauthClient)
+			Expect(returnedOauthClient).To(Equal(oauthClient))
 		})
 	})
 
