@@ -126,7 +126,8 @@ var _ = Describe("FetchToken", func() {
 			})
 
 			Context("when OAuth server cannot be reached", func() {
-				It("retries number of times and finally returns an error", func() {
+				It("retries number of times and finally returns an error", func(done Done) {
+					defer close(done)
 					cfg.UaaEndpoint = "http://bogus.url:80"
 					client, err := uaa_go_client.NewClient(logger, cfg, clock)
 					Expect(err).NotTo(HaveOccurred())
@@ -142,10 +143,10 @@ var _ = Describe("FetchToken", func() {
 					for i := 0; i < DefaultMaxNumberOfRetries; i++ {
 						Eventually(logger).Should(gbytes.Say("fetch-token-from-uaa-start.*bogus.url"))
 						Eventually(logger).Should(gbytes.Say("error-fetching-token"))
-						clock.Increment(DefaultRetryInterval + 10*time.Second)
+						clock.WaitForWatcherAndIncrement(DefaultRetryInterval + 10*time.Second)
 					}
 					wg.Wait()
-				})
+				}, 5)
 			})
 
 			Context("when a non 200 OK is returned", func() {
