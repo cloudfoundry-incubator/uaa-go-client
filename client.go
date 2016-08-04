@@ -14,14 +14,14 @@ import (
 	"strings"
 	"sync"
 
-	trace "github.com/cloudfoundry-incubator/trace-logger"
+	trace "code.cloudfoundry.org/trace-logger"
 	"github.com/dgrijalva/jwt-go"
 
 	"github.com/pivotal-golang/clock"
 	"github.com/pivotal-golang/lager"
 
-	"github.com/cloudfoundry-incubator/uaa-go-client/config"
-	"github.com/cloudfoundry-incubator/uaa-go-client/schema"
+	"code.cloudfoundry.org/uaa-go-client/config"
+	"code.cloudfoundry.org/uaa-go-client/schema"
 )
 
 var ErrClientAlreadyExists = errors.New("Client already exists")
@@ -314,7 +314,7 @@ func (u *UaaClient) RegisterOauthClient(oauthClient *schema.OauthClient) (*schem
 	request, err := http.NewRequest("POST", clientsUrl, bytes.NewBuffer(bodyBytes))
 	request.Header.Add("Content-Type", "application/json; charset=UTF-8")
 	request.Header.Add("Accept", "application/json; charset=utf-8")
-	request.Header.Add("Authorization", "bearer " + token.AccessToken)
+	request.Header.Add("Authorization", "bearer "+token.AccessToken)
 
 	response, err := u.client.Do(request)
 

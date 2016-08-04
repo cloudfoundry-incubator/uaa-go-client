@@ -9,10 +9,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cloudfoundry-incubator/trace-logger"
-	"github.com/cloudfoundry-incubator/uaa-go-client"
-	"github.com/cloudfoundry-incubator/uaa-go-client/config"
-	"github.com/cloudfoundry-incubator/uaa-go-client/schema"
+	trace "code.cloudfoundry.org/trace-logger"
+	"code.cloudfoundry.org/uaa-go-client"
+	"code.cloudfoundry.org/uaa-go-client/config"
+	"code.cloudfoundry.org/uaa-go-client/schema"
 	"github.com/pivotal-golang/clock/fakeclock"
 	"github.com/pivotal-golang/lager/lagertest"
 

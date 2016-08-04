@@ -1,11 +1,11 @@
 package uaa_go_client_test
 
 import (
-	. "github.com/cloudfoundry-incubator/uaa-go-client"
+	. "code.cloudfoundry.org/uaa-go-client"
 
+	"code.cloudfoundry.org/uaa-go-client/schema"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/cloudfoundry-incubator/uaa-go-client/schema"
 )
 
 var _ = Describe("NoopUaaClient", func() {

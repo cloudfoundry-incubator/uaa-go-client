@@ -6,14 +6,13 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"os"
 	"path"
 	"path/filepath"
 	"strings"
 	"time"
 
-	"github.com/cloudfoundry-incubator/uaa-go-client"
-	"github.com/cloudfoundry-incubator/uaa-go-client/config"
+	"code.cloudfoundry.org/uaa-go-client"
+	"code.cloudfoundry.org/uaa-go-client/config"
 	"github.com/pivotal-golang/clock/fakeclock"
 	"github.com/pivotal-golang/lager/lagertest"
 
@@ -193,9 +192,10 @@ var _ = Describe("UAA Client", func() {
 			)
 
 			BeforeEach(func() {
-				var err error
-				var basePath = path.Join(lastGoPath(), "src", "github.com", "cloudfoundry-incubator", "uaa-go-client", "fixtures")
-				cfg.CACerts = filepath.Join(basePath, "ca.pem")
+				caCertPath, err := filepath.Abs(path.Join("fixtures", "ca.pem"))
+				Expect(err).ToNot(HaveOccurred())
+
+				cfg.CACerts = caCertPath
 				cfg.MaxNumberOfRetries = 0
 				tlsClient, err = uaa_go_client.NewClient(logger, cfg, clock)
 				Expect(err).ToNot(HaveOccurred())
@@ -241,11 +241,6 @@ var _ = Describe("UAA Client", func() {
 		})
 	})
 })
-
-func lastGoPath() string {
-	goPaths := strings.Split(os.Getenv("GOPATH"), ":")
-	return goPaths[len(goPaths)-1]
-}
 
 func newTlsListener(listener net.Listener) net.Listener {
 	public := "fixtures/server.pem"

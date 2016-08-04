@@ -1,4 +1,4 @@
-package main
+package fetch_token
 
 import (
 	"fmt"
@@ -6,9 +6,9 @@ import (
 	"os"
 	"strconv"
 
-	client "github.com/cloudfoundry-incubator/uaa-go-client"
-	"github.com/cloudfoundry-incubator/uaa-go-client/config"
-	"github.com/cloudfoundry-incubator/uaa-go-client/schema"
+	client "code.cloudfoundry.org/uaa-go-client"
+	"code.cloudfoundry.org/uaa-go-client/config"
+	"code.cloudfoundry.org/uaa-go-client/schema"
 	"github.com/pivotal-golang/clock"
 	"github.com/pivotal-golang/lager"
 )

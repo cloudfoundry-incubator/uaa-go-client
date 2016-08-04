@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cloudfoundry-incubator/uaa-go-client"
-	"github.com/cloudfoundry-incubator/uaa-go-client/config"
-	"github.com/cloudfoundry-incubator/uaa-go-client/schema"
+	"code.cloudfoundry.org/uaa-go-client"
+	"code.cloudfoundry.org/uaa-go-client/config"
+	"code.cloudfoundry.org/uaa-go-client/schema"
 	"github.com/pivotal-golang/clock/fakeclock"
 	"github.com/pivotal-golang/lager/lagertest"
 
@@ -57,15 +57,15 @@ var _ = Describe("RegisterOauthClient", func() {
 			}
 
 			oauthClient := &schema.OauthClient{
-				ClientId: "clientId",
-				Name:   "the new client",
-				ClientSecret:   "secret",
-				Scope:   []string{"uaa.none"},
-				ResourceIds:   []string{"none"},
-				Authorities:   []string{"openid"},
-				AuthorizedGrantTypes:   []string{"client_credentials"},
-				AccessTokenValidity:   10000,
-				RedirectUri:   []string{"http://example.com"},
+				ClientId:             "clientId",
+				Name:                 "the new client",
+				ClientSecret:         "secret",
+				Scope:                []string{"uaa.none"},
+				ResourceIds:          []string{"none"},
+				Authorities:          []string{"openid"},
+				AuthorizedGrantTypes: []string{"client_credentials"},
+				AccessTokenValidity:  10000,
+				RedirectUri:          []string{"http://example.com"},
 			}
 
 			server.AppendHandlers(
@@ -89,15 +89,15 @@ var _ = Describe("RegisterOauthClient", func() {
 			}
 
 			oauthClient := &schema.OauthClient{
-				ClientId: "clientId",
-				Name:   "the new client",
-				ClientSecret:   "secret",
-				Scope:   []string{"uaa.none"},
-				ResourceIds:   []string{"none"},
-				Authorities:   []string{"openid"},
-				AuthorizedGrantTypes:   []string{"client_credentials"},
-				AccessTokenValidity:   10000,
-				RedirectUri:   []string{"http://example.com"},
+				ClientId:             "clientId",
+				Name:                 "the new client",
+				ClientSecret:         "secret",
+				Scope:                []string{"uaa.none"},
+				ResourceIds:          []string{"none"},
+				Authorities:          []string{"openid"},
+				AuthorizedGrantTypes: []string{"client_credentials"},
+				AccessTokenValidity:  10000,
+				RedirectUri:          []string{"http://example.com"},
 			}
 
 			server.AppendHandlers(

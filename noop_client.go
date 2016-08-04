@@ -1,6 +1,6 @@
 package uaa_go_client
 
-import "github.com/cloudfoundry-incubator/uaa-go-client/schema"
+import "code.cloudfoundry.org/uaa-go-client/schema"
 
 type NoOpUaaClient struct {
 }

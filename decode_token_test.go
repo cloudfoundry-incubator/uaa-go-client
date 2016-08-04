@@ -9,9 +9,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cloudfoundry-incubator/uaa-go-client"
-	"github.com/cloudfoundry-incubator/uaa-go-client/config"
-	"github.com/cloudfoundry-incubator/uaa-go-client/fakes"
+	"code.cloudfoundry.org/uaa-go-client"
+	"code.cloudfoundry.org/uaa-go-client/config"
+	"code.cloudfoundry.org/uaa-go-client/fakes"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/pivotal-golang/clock/fakeclock"
@@ -30,7 +30,6 @@ var _ = Describe("DecodeToken", func() {
 		// fakeUaaKeyFetcher *fakes.FakeUaaKeyFetcher
 		signedKey      string
 		UserPrivateKey string
-		UAAPublicKey   string
 		logger         lager.Logger
 
 		token *jwt.Token
@@ -46,7 +45,6 @@ var _ = Describe("DecodeToken", func() {
 
 	BeforeEach(func() {
 		UserPrivateKey = "UserPrivateKey"
-		UAAPublicKey = "UAAPublicKey"
 		logger = lagertest.NewTestLogger("test")
 
 		fakeSigningMethod = &fakes.FakeSigningMethod{}

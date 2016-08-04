@@ -13,15 +13,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cloudfoundry-incubator/uaa-go-client"
-	"github.com/cloudfoundry-incubator/uaa-go-client/config"
-	"github.com/cloudfoundry-incubator/uaa-go-client/schema"
+	"code.cloudfoundry.org/uaa-go-client"
+	"code.cloudfoundry.org/uaa-go-client/config"
+	"code.cloudfoundry.org/uaa-go-client/schema"
 	"github.com/pivotal-golang/clock/fakeclock"
 
+	"encoding/json"
 	"github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/ghttp"
 	"github.com/pivotal-golang/lager"
-	"encoding/json"
 )
 
 func TestClient(t *testing.T) {
@@ -112,7 +112,7 @@ var getRegisterOauthClientHandlerFunc = func(status int, token *schema.Token, oa
 	oauthClientString, err := json.Marshal(oauthClient)
 	var responseBody string
 	if status == http.StatusOK {
-		responseBody =  string(oauthClientString)
+		responseBody = string(oauthClientString)
 	} else {
 		responseBody = ""
 	}
@@ -123,7 +123,7 @@ var getRegisterOauthClientHandlerFunc = func(status int, token *schema.Token, oa
 		ghttp.VerifyRequest("POST", "/oauth/clients"),
 		ghttp.VerifyContentType("application/json; charset=UTF-8"),
 		ghttp.VerifyHeader(http.Header{
-			"Accept": []string{"application/json; charset=utf-8"},
+			"Accept":        []string{"application/json; charset=utf-8"},
 			"Authorization": []string{"bearer " + token.AccessToken},
 		}),
 		verifyBody(string(oauthClientString)),

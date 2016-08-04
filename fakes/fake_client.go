@@ -4,8 +4,8 @@ package fakes
 import (
 	"sync"
 
-	"github.com/cloudfoundry-incubator/uaa-go-client"
-	"github.com/cloudfoundry-incubator/uaa-go-client/schema"
+	"code.cloudfoundry.org/uaa-go-client"
+	"code.cloudfoundry.org/uaa-go-client/schema"
 )
 
 type FakeClient struct {
