@@ -6,6 +6,7 @@ A go library for Cloud Foundry [UAA](https://github.com/cloudfoundry/uaa) that p
 - decode tokens
 - get token signing key
 
+**Note**: This repository should be imported as `code.cloudfoundry.org/uaa-go-client`.
 
 ## Example
 This example client connects to UAA using https and skips cert verification.
