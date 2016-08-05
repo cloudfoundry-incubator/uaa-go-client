@@ -17,8 +17,8 @@ import (
 	trace "code.cloudfoundry.org/trace-logger"
 	"github.com/dgrijalva/jwt-go"
 
-	"github.com/pivotal-golang/clock"
-	"github.com/pivotal-golang/lager"
+	"code.cloudfoundry.org/clock"
+	"code.cloudfoundry.org/lager"
 
 	"code.cloudfoundry.org/uaa-go-client/config"
 	"code.cloudfoundry.org/uaa-go-client/schema"

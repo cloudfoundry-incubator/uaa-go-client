@@ -13,15 +13,15 @@ import (
 	"sync"
 	"time"
 
+	"code.cloudfoundry.org/clock/fakeclock"
 	"code.cloudfoundry.org/uaa-go-client"
 	"code.cloudfoundry.org/uaa-go-client/config"
 	"code.cloudfoundry.org/uaa-go-client/schema"
-	"github.com/pivotal-golang/clock/fakeclock"
 
+	"code.cloudfoundry.org/lager"
 	"encoding/json"
 	"github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/ghttp"
-	"github.com/pivotal-golang/lager"
 )
 
 func TestClient(t *testing.T) {

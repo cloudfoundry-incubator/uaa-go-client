@@ -6,10 +6,10 @@ import (
 	"os"
 	"strconv"
 
+	"code.cloudfoundry.org/clock"
+	"code.cloudfoundry.org/lager"
 	client "code.cloudfoundry.org/uaa-go-client"
 	"code.cloudfoundry.org/uaa-go-client/config"
-	"github.com/pivotal-golang/clock"
-	"github.com/pivotal-golang/lager"
 )
 
 func main() {
