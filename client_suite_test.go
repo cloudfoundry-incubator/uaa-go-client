@@ -99,7 +99,7 @@ var verifyFetchWithRetries = func(client uaa_go_client.Client, server *ghttp.Ser
 	}(&wg)
 
 	for i := 0; i < numRetries; i++ {
-		Eventually(server.ReceivedRequests, 5*time.Second, 1*time.Second).Should(HaveLen(i + 1))
+		Eventually(server.ReceivedRequests, 7*time.Second, 1*time.Second).Should(HaveLen(i + 1))
 		clock.Increment(DefaultRetryInterval + 10*time.Second)
 	}
 
