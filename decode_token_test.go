@@ -221,7 +221,7 @@ var _ = Describe("DecodeToken", func() {
 				It("tries to refresh key and returns the uaa error", func() {
 					err := client.DecodeToken(signedKey, "route.advertise")
 					Expect(err).To(HaveOccurred())
-					Expect(err.Error()).To(Equal("http-error-fetching-key"))
+					Expect(err.Error()).To(ContainSubstring("http error: status code: 504"))
 					Expect(len(server.ReceivedRequests())).To(Equal(2))
 				})
 			})
@@ -338,7 +338,7 @@ var _ = Describe("DecodeToken", func() {
 								case fail := <-expectErrorChan:
 									if fail {
 										Expect(err).To(HaveOccurred())
-										Expect(err.Error()).To(Equal("http-error-fetching-key"))
+										Expect(err.Error()).To(ContainSubstring("http error"))
 									} else {
 										Expect(err).NotTo(HaveOccurred())
 									}

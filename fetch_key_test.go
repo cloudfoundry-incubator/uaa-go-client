@@ -143,7 +143,7 @@ var _ = Describe("Fetch Key", func() {
 
 				It("returns the error", func() {
 					Expect(err).To(HaveOccurred())
-					Expect(err).Should(Equal(errors.New("http-error-fetching-key")))
+					Expect(err.Error()).Should(ContainSubstring("http error"))
 					Expect(key).To(BeEmpty())
 				})
 			})

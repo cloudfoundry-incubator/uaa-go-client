@@ -218,7 +218,7 @@ func (u *UaaClient) FetchKey() (string, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err = errors.New("http-error-fetching-key")
+		err = fmt.Errorf("http error: status code: %d", resp.StatusCode)
 		return "", err
 	}
 
