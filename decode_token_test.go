@@ -77,9 +77,10 @@ var _ = Describe("DecodeToken", func() {
 		token.Header = header
 
 		cfg = &config.Config{
-			MaxNumberOfRetries:    DefaultMaxNumberOfRetries,
-			RetryInterval:         DefaultRetryInterval,
-			ExpirationBufferInSec: DefaultExpirationBufferTime,
+			MaxNumberOfRetries:            DefaultMaxNumberOfRetries,
+			RetryInterval:                 DefaultRetryInterval,
+			ExpirationBufferInSec:         DefaultExpirationBufferTime,
+			InsecureAllowAnySigningMethod: true,
 		}
 		server = ghttp.NewServer()
 

@@ -1,7 +1,15 @@
 package uaa_go_client_test
 
 import (
+	"crypto"
+	"crypto/hmac"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/sha256"
 	"crypto/tls"
+	"crypto/x509"
+	"encoding/base64"
+	"encoding/pem"
 	"fmt"
 	"net"
 	"net/http"
@@ -145,6 +153,78 @@ var _ = Describe("UAA Client", func() {
 			})
 		})
 	})
+
+	Describe("Decode token", func() {
+		var (
+			uaaClient    uaa_go_client.Client
+			publicKeyPEM []byte
+			privateKey   *rsa.PrivateKey
+		)
+
+		BeforeEach(func() {
+			var err error
+			var publicKey *rsa.PublicKey
+			privateKey, publicKey, err = generateRSAKeyPair()
+			Expect(err).NotTo(HaveOccurred())
+			publicKeyPEM, err = publicKeyToPEM(publicKey)
+			Expect(err).NotTo(HaveOccurred())
+
+			cfg = &config.Config{
+				MaxNumberOfRetries:    DefaultMaxNumberOfRetries,
+				RetryInterval:         DefaultRetryInterval,
+				ExpirationBufferInSec: DefaultExpirationBufferTime,
+			}
+
+			server = ghttp.NewServer()
+
+			url, err := url.Parse(server.URL())
+			Expect(err).ToNot(HaveOccurred())
+			cfg.UaaEndpoint = "http://" + url.Host
+
+			var uaaResponseStruct = struct {
+				Alg   string `json:"alg"`
+				Value string `json:"value"`
+			}{"alg", string(publicKeyPEM)}
+			server.AppendHandlers(
+				ghttp.RespondWithJSONEncoded(
+					http.StatusOK,
+					uaaResponseStruct,
+				),
+			)
+
+			cfg.ClientName = "client-name"
+			cfg.ClientSecret = "client-secret"
+			clock = fakeclock.NewFakeClock(time.Now())
+			logger = lagertest.NewTestLogger("test")
+
+			uaaClient, err = uaa_go_client.NewClient(logger, cfg, clock)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(uaaClient).NotTo(BeNil())
+		})
+
+		AfterEach(func() {
+			server.Close()
+		})
+
+		Context("when the token has been signed with the correct private key", func() {
+			It("succeeds", func() {
+				validToken, err := makeValidToken(privateKey)
+				Expect(err).NotTo(HaveOccurred())
+				err = uaaClient.DecodeToken(validToken, "some.scope")
+				Expect(err).ToNot(HaveOccurred())
+			})
+		})
+
+		Context("when the token algorithm doesn't match the key type", func() {
+			It("fails", func() {
+				spoofedToken, err := makeSpoofedToken(publicKeyPEM)
+				Expect(err).NotTo(HaveOccurred())
+				err = uaaClient.DecodeToken(spoofedToken, "some.scope")
+				Expect(err).To(MatchError("invalid signing method"))
+			})
+		})
+	})
+
 	Context("secure (TLS) client", func() {
 
 		var (
@@ -254,4 +334,100 @@ func newTlsListener(listener net.Listener) net.Listener {
 	}
 
 	return tls.NewListener(listener, tlsConfig)
+}
+
+const (
+	pemHeaderPrivateKey = "RSA PRIVATE KEY"
+	pemHeaderPublicKey  = "PUBLIC KEY"
+)
+
+func generateRSAKeyPair() (*rsa.PrivateKey, *rsa.PublicKey, error) {
+	private, err := rsa.GenerateKey(rand.Reader, 1024)
+	if err != nil {
+		return nil, nil, err
+	}
+	public := private.Public().(*rsa.PublicKey)
+	return private, public, nil
+}
+
+func encodePEM(keyBytes []byte, keyType string) []byte {
+	block := &pem.Block{
+		Type:  keyType,
+		Bytes: keyBytes,
+	}
+
+	return pem.EncodeToMemory(block)
+}
+
+// PrivateKeyToPEM serializes an RSA Private key into PEM format.
+func privateKeyToPEM(privateKey *rsa.PrivateKey) []byte {
+	keyBytes := x509.MarshalPKCS1PrivateKey(privateKey)
+
+	return encodePEM(keyBytes, pemHeaderPrivateKey)
+}
+
+// PublicKeyToPEM serializes an RSA Public key into PEM format.
+func publicKeyToPEM(publicKey *rsa.PublicKey) ([]byte, error) {
+	keyBytes, err := x509.MarshalPKIXPublicKey(publicKey)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return encodePEM(keyBytes, pemHeaderPublicKey), nil
+}
+
+func jwtHeader(alg, kid string) string {
+	return fmt.Sprintf(`{ "alg": "%s", "kid": "%s", "typ": "JWT" }`, alg, kid)
+}
+
+var tokenEncoding = base64.RawURLEncoding
+
+func signWithHS256(signingString string, key string) string {
+	hasher := hmac.New(sha256.New, []byte(key))
+	hasher.Write([]byte(signingString))
+	return tokenEncoding.EncodeToString(hasher.Sum(nil))
+}
+
+func signWithRS256(signingString string, privateKey *rsa.PrivateKey) (string, error) {
+	hasher := crypto.SHA256.New()
+	hasher.Write([]byte(signingString))
+
+	sigBytes, err := rsa.SignPKCS1v15(rand.Reader, privateKey, crypto.SHA256, hasher.Sum(nil))
+	if err != nil {
+		return "", err
+	}
+	return tokenEncoding.EncodeToString(sigBytes), nil
+}
+
+const tokenPayload = `{
+  "scope": [
+    "some.scope"
+  ],
+  "iat": 1481253086,
+  "exp": 1491253686
+}`
+
+func makeValidToken(privateKey *rsa.PrivateKey) (string, error) {
+	header := jwtHeader("RS256", "some-key-id")
+	signingString := fmt.Sprintf("%s.%s",
+		tokenEncoding.EncodeToString([]byte(header)),
+		tokenEncoding.EncodeToString([]byte(tokenPayload)),
+	)
+	signature, err := signWithRS256(signingString, privateKey)
+	if err != nil {
+		return "", err
+	}
+	fullToken := fmt.Sprintf("bearer %s.%s", signingString, signature)
+	return fullToken, nil
+}
+
+func makeSpoofedToken(publicKeyPEM []byte) (string, error) {
+	header := jwtHeader("HS256", "some-key-id")
+	signingString := fmt.Sprintf("%s.%s",
+		tokenEncoding.EncodeToString([]byte(header)),
+		tokenEncoding.EncodeToString([]byte(tokenPayload)),
+	)
+	signature := signWithHS256(signingString, string(publicKeyPEM))
+	fullToken := fmt.Sprintf("bearer %s.%s", signingString, signature)
+	return fullToken, nil
 }

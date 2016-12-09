@@ -262,6 +262,9 @@ func (u *UaaClient) DecodeToken(uaaToken string, desiredPermissions ...string) e
 
 		if err == nil {
 			token, err = jwt.Parse(jwtToken, func(t *jwt.Token) (interface{}, error) {
+				if !u.isValidSigningMethod(t) {
+					return nil, errors.New("invalid signing method")
+				}
 				return []byte(uaaKey), nil
 			})
 
@@ -301,6 +304,19 @@ func (u *UaaClient) DecodeToken(uaaToken string, desiredPermissions ...string) e
 	}
 
 	return nil
+}
+
+func (u *UaaClient) isValidSigningMethod(token *jwt.Token) bool {
+	if u.config.InsecureAllowAnySigningMethod {
+		return true
+	}
+
+	switch token.Method {
+	case jwt.SigningMethodRS256, jwt.SigningMethodRS384, jwt.SigningMethodRS512:
+		return true
+	default:
+		return false
+	}
 }
 
 func (u *UaaClient) RegisterOauthClient(oauthClient *schema.OauthClient) (*schema.OauthClient, error) {
