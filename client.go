@@ -75,6 +75,9 @@ func NewClient(logger lager.Logger, cfg *config.Config, clock clock.Clock) (Clie
 	} else {
 		client = &http.Client{}
 	}
+	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+		return http.ErrUseLastResponse
+	}
 
 	if cfg.ExpirationBufferInSec < 0 {
 		cfg.ExpirationBufferInSec = config.DefaultExpirationBufferInSec

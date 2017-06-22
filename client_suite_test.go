@@ -18,8 +18,9 @@ import (
 	"code.cloudfoundry.org/uaa-go-client/config"
 	"code.cloudfoundry.org/uaa-go-client/schema"
 
-	"code.cloudfoundry.org/lager"
 	"encoding/json"
+
+	"code.cloudfoundry.org/lager"
 	"github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/ghttp"
 )
@@ -67,7 +68,7 @@ var verifyLogs = func(reqMessage, resMessage string) {
 	Expect(logger).To(gbytes.Say(resMessage))
 }
 
-var getOauthHandlerFunc = func(status int, token *schema.Token) http.HandlerFunc {
+var getOauthHandlerFunc = func(status int, token *schema.Token, optionalHeader ...http.Header) http.HandlerFunc {
 	return ghttp.CombineHandlers(
 		ghttp.VerifyRequest("POST", "/oauth/token"),
 		ghttp.VerifyBasicAuth("client-name", "client-secret"),
@@ -76,7 +77,7 @@ var getOauthHandlerFunc = func(status int, token *schema.Token) http.HandlerFunc
 			"Accept": []string{"application/json; charset=utf-8"},
 		}),
 		verifyBody("grant_type=client_credentials"),
-		ghttp.RespondWithJSONEncoded(status, token),
+		ghttp.RespondWithJSONEncoded(status, token, optionalHeader...),
 	)
 }
 

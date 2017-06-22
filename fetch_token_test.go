@@ -96,6 +96,9 @@ var _ = Describe("FetchToken", func() {
 
 			cfg.ClientName = "client-name"
 			cfg.ClientSecret = "client-secret"
+		})
+		JustBeforeEach(func() {
+			var err error
 			clock = fakeclock.NewFakeClock(time.Now())
 			logger = lagertest.NewTestLogger("test")
 
@@ -103,7 +106,6 @@ var _ = Describe("FetchToken", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(client).NotTo(BeNil())
 		})
-
 		AfterEach(func() {
 			server.Close()
 		})
@@ -150,6 +152,11 @@ var _ = Describe("FetchToken", func() {
 			})
 
 			Context("when a non 200 OK is returned", func() {
+				var header http.Header
+				BeforeEach(func() {
+					header = make(http.Header)
+					header.Add("Location", server.URL())
+				})
 				Context("when OAuth server returns a 4xx http status code", func() {
 					It("returns an error and doesn't retry", func() {
 						server.AppendHandlers(
@@ -181,7 +188,7 @@ var _ = Describe("FetchToken", func() {
 				Context("when OAuth server returns a 3xx http status code", func() {
 					It("returns an error and doesn't retry", func() {
 						server.AppendHandlers(
-							ghttp.RespondWith(http.StatusMovedPermanently, "moved"),
+							ghttp.RespondWith(http.StatusMovedPermanently, "moved", header),
 						)
 
 						_, err := client.FetchToken(forceUpdate)
@@ -195,7 +202,7 @@ var _ = Describe("FetchToken", func() {
 					BeforeEach(func() {
 						server.AppendHandlers(
 							getOauthHandlerFunc(http.StatusServiceUnavailable, nil),
-							getOauthHandlerFunc(http.StatusMovedPermanently, nil),
+							getOauthHandlerFunc(http.StatusMovedPermanently, nil, header),
 						)
 					})
 
