@@ -32,6 +32,7 @@ func TestClient(t *testing.T) {
 
 const (
 	TokenKeyEndpoint            = "/token_key"
+	OpenIDConfigEndpoint        = "/.well-known/openid-configuration"
 	DefaultMaxNumberOfRetries   = 3
 	DefaultRetryInterval        = 15 * time.Second
 	DefaultExpirationBufferTime = 30

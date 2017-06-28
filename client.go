@@ -50,6 +50,7 @@ type UaaClient struct {
 	logger           lager.Logger
 	uaaPublicKey     string
 	rwlock           sync.RWMutex
+	issuer           string
 }
 
 type OpenIDConfig struct {
@@ -157,6 +158,7 @@ func (u *UaaClient) FetchIssuer() (string, error) {
 	}
 
 	logger.Info("successfully-received-issuer")
+	u.updateIssuer(data.Issuer)
 	return data.Issuer, nil
 }
 
@@ -312,6 +314,9 @@ func (u *UaaClient) DecodeToken(uaaToken string, desiredPermissions ...string) e
 				if !u.isValidSigningMethod(t) {
 					return nil, errors.New("invalid signing method")
 				}
+				if !u.isValidIssuer(t) {
+					return nil, errors.New("invalid issuer")
+				}
 				return []byte(uaaKey), nil
 			})
 
@@ -351,6 +356,19 @@ func (u *UaaClient) DecodeToken(uaaToken string, desiredPermissions ...string) e
 	}
 
 	return nil
+}
+
+func (u *UaaClient) isValidIssuer(token *jwt.Token) bool {
+	if u.issuer == "" {
+		_, err := u.FetchIssuer()
+		if err != nil {
+			return false
+		}
+	}
+	if value, ok := token.Claims["iss"]; ok {
+		return value == u.issuer
+	}
+	return false
 }
 
 func (u *UaaClient) isValidSigningMethod(token *jwt.Token) bool {
@@ -426,6 +444,10 @@ func checkPublicKey(key string) error {
 		return errors.New("Public uaa token must be PEM encoded")
 	}
 	return nil
+}
+
+func (u *UaaClient) updateIssuer(issuer string) {
+	u.issuer = issuer
 }
 
 func checkTokenFormat(token string) (string, error) {

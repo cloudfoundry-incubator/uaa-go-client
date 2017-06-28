@@ -190,6 +190,10 @@ var _ = Describe("UAA Client", func() {
 					http.StatusOK,
 					uaaResponseStruct,
 				),
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", OpenIDConfigEndpoint),
+					ghttp.RespondWith(http.StatusOK, fmt.Sprintf("{\"issuer\":\"https://uaa.domain.com\"}")),
+				),
 			)
 
 			cfg.ClientName = "client-name"
@@ -481,7 +485,8 @@ const tokenPayload = `{
     "some.scope"
   ],
   "iat": 1481253086,
-  "exp": 2491253686
+  "exp": 2491253686,
+	"iss": "https://uaa.domain.com"
 }`
 
 func makeValidToken(privateKey *rsa.PrivateKey) (string, error) {
