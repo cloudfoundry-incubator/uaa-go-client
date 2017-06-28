@@ -31,11 +31,13 @@ type uaaKey struct {
 	Value string `json:"value"`
 }
 
+//go:generate counterfeiter -o fakes/fake_client.go . Client
 type Client interface {
 	FetchToken(forceUpdate bool) (*schema.Token, error)
 	FetchKey() (string, error)
 	DecodeToken(uaaToken string, desiredPermissions ...string) error
 	RegisterOauthClient(*schema.OauthClient) (*schema.OauthClient, error)
+	FetchIssuer() (string, error)
 }
 
 type UaaClient struct {
@@ -48,6 +50,10 @@ type UaaClient struct {
 	logger           lager.Logger
 	uaaPublicKey     string
 	rwlock           sync.RWMutex
+}
+
+type OpenIDConfig struct {
+	Issuer string `json:"issuer"`
 }
 
 func NewClient(logger lager.Logger, cfg *config.Config, clock clock.Clock) (Client, error) {
@@ -114,6 +120,44 @@ func newSecureClient(cfg *config.Config) (*http.Client, error) {
 
 	client := &http.Client{Transport: tr}
 	return client, nil
+}
+
+func (u *UaaClient) FetchIssuer() (string, error) {
+	logger := u.logger.Session("uaa-client")
+	fetchOpenIdURL := fmt.Sprintf("%s/.well-known/openid-configuration", u.config.UaaEndpoint)
+	logger.Info("started-fetching-openId-metadata", lager.Data{"endpoint": fetchOpenIdURL})
+
+	request, err := http.NewRequest("GET", fetchOpenIdURL, nil)
+	if err != nil {
+		return "", err
+	}
+	trace.DumpRequest(request)
+	resp, err := u.client.Do(request)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	trace.DumpResponse(resp)
+	logger.Info("finished-fetching-openId-metatdata", lager.Data{"status-code": resp.StatusCode})
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", errors.New(fmt.Sprintf("status code: %d, body: %s", resp.StatusCode, body))
+	}
+
+	data := &OpenIDConfig{}
+	err = json.Unmarshal(body, data)
+	if err != nil {
+		return "", err
+	}
+
+	logger.Info("successfully-received-issuer")
+	return data.Issuer, nil
 }
 
 func (u *UaaClient) FetchToken(forceUpdate bool) (*schema.Token, error) {

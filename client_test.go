@@ -225,6 +225,83 @@ var _ = Describe("UAA Client", func() {
 		})
 	})
 
+	Describe("Fetch Issuer Metadata", func() {
+		var (
+			uaaClient    uaa_go_client.Client
+			publicKeyPEM []byte
+			privateKey   *rsa.PrivateKey
+		)
+		BeforeEach(func() {
+			var err error
+			var publicKey *rsa.PublicKey
+			privateKey, publicKey, err = generateRSAKeyPair()
+			Expect(err).NotTo(HaveOccurred())
+			publicKeyPEM, err = publicKeyToPEM(publicKey)
+			Expect(err).NotTo(HaveOccurred())
+
+			cfg = &config.Config{
+				MaxNumberOfRetries:    DefaultMaxNumberOfRetries,
+				RetryInterval:         DefaultRetryInterval,
+				ExpirationBufferInSec: DefaultExpirationBufferTime,
+			}
+
+			server = ghttp.NewServer()
+
+			url, err := url.Parse(server.URL())
+			Expect(err).ToNot(HaveOccurred())
+			cfg.UaaEndpoint = "http://" + url.Host
+
+			cfg.ClientName = "client-name"
+			cfg.ClientSecret = "client-secret"
+			clock = fakeclock.NewFakeClock(time.Now())
+			logger = lagertest.NewTestLogger("test")
+
+			uaaClient, err = uaa_go_client.NewClient(logger, cfg, clock)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(uaaClient).NotTo(BeNil())
+		})
+
+		AfterEach(func() {
+			server.Close()
+		})
+		Context("when UAA server responds with valid metadata structure", func() {
+			BeforeEach(func() {
+				uaaResponse := `{"issuer":"https://uaa.domain.com"}`
+
+				server.AppendHandlers(
+					ghttp.RespondWith(
+						http.StatusOK,
+						uaaResponse,
+					),
+				)
+			})
+			It("successfully unmarshall the metadata info", func() {
+
+				issuer, err := uaaClient.FetchIssuer()
+				Expect(err).ToNot(HaveOccurred())
+				Expect(issuer).To(Equal("https://uaa.domain.com"))
+			})
+		})
+		Context("when UAA server responds with invalid metadata structure", func() {
+			BeforeEach(func() {
+				uaaResponse := `{"https://uaa.domain.com"}`
+
+				server.AppendHandlers(
+					ghttp.RespondWith(
+						http.StatusOK,
+						uaaResponse,
+					),
+				)
+			})
+			It("returns an error", func() {
+
+				issuer, err := uaaClient.FetchIssuer()
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
+				Expect(issuer).To(Equal(""))
+			})
+		})
+	})
 	Context("secure (TLS) client", func() {
 
 		var (
