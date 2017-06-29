@@ -82,9 +82,17 @@ func NewClient(logger lager.Logger, cfg *config.Config, clock clock.Clock) (Clie
 	} else {
 		client = &http.Client{}
 	}
+
 	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 		return http.ErrUseLastResponse
 	}
+
+	if cfg.RequestTimeout < 0 {
+		client.Timeout = config.DefaultRequestTimeout
+	} else {
+		client.Timeout = cfg.RequestTimeout
+	}
+	logger.Debug("HTTP Request timeout in seconds", lager.Data{"value": client.Timeout.Seconds()})
 
 	if cfg.ExpirationBufferInSec < 0 {
 		cfg.ExpirationBufferInSec = config.DefaultExpirationBufferInSec

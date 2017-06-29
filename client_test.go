@@ -39,6 +39,7 @@ var _ = Describe("UAA Client", func() {
 				MaxNumberOfRetries:    DefaultMaxNumberOfRetries,
 				RetryInterval:         DefaultRetryInterval,
 				ExpirationBufferInSec: DefaultExpirationBufferTime,
+				RequestTimeout:        DefaultRequestTimeout,
 			}
 			server = ghttp.NewServer()
 
@@ -144,6 +145,7 @@ var _ = Describe("UAA Client", func() {
 							UaaEndpoint:           "http://some.url:80",
 							ClientName:            "client-name",
 							ClientSecret:          "client-secret",
+							RequestTimeout:        DefaultRequestTimeout,
 						}
 						client, err := uaa_go_client.NewClient(logger, config, clock)
 						Expect(err).NotTo(HaveOccurred())
@@ -173,6 +175,7 @@ var _ = Describe("UAA Client", func() {
 				MaxNumberOfRetries:    DefaultMaxNumberOfRetries,
 				RetryInterval:         DefaultRetryInterval,
 				ExpirationBufferInSec: DefaultExpirationBufferTime,
+				RequestTimeout:        DefaultRequestTimeout,
 			}
 
 			server = ghttp.NewServer()
@@ -247,6 +250,7 @@ var _ = Describe("UAA Client", func() {
 				MaxNumberOfRetries:    DefaultMaxNumberOfRetries,
 				RetryInterval:         DefaultRetryInterval,
 				ExpirationBufferInSec: DefaultExpirationBufferTime,
+				RequestTimeout:        DefaultRequestTimeout,
 			}
 
 			server = ghttp.NewServer()
@@ -356,6 +360,7 @@ var _ = Describe("UAA Client", func() {
 				MaxNumberOfRetries:    DefaultMaxNumberOfRetries,
 				RetryInterval:         DefaultRetryInterval,
 				ExpirationBufferInSec: DefaultExpirationBufferTime,
+				RequestTimeout:        DefaultRequestTimeout,
 			}
 
 			listener, err := net.Listen("tcp", "127.0.0.1:0")

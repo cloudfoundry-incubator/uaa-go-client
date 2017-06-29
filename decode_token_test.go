@@ -81,6 +81,7 @@ var _ = Describe("DecodeToken", func() {
 			RetryInterval:                 DefaultRetryInterval,
 			ExpirationBufferInSec:         DefaultExpirationBufferTime,
 			InsecureAllowAnySigningMethod: true,
+			RequestTimeout:                DefaultRequestTimeout,
 		}
 		server = ghttp.NewServer()
 

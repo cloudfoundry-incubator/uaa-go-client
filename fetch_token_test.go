@@ -35,6 +35,7 @@ var _ = Describe("FetchToken", func() {
 				MaxNumberOfRetries:    DefaultMaxNumberOfRetries,
 				RetryInterval:         DefaultRetryInterval,
 				ExpirationBufferInSec: DefaultExpirationBufferTime,
+				RequestTimeout:        DefaultRequestTimeout,
 			}
 		})
 		JustBeforeEach(func() {
@@ -83,6 +84,7 @@ var _ = Describe("FetchToken", func() {
 				MaxNumberOfRetries:    DefaultMaxNumberOfRetries,
 				RetryInterval:         DefaultRetryInterval,
 				ExpirationBufferInSec: DefaultExpirationBufferTime,
+				RequestTimeout:        DefaultRequestTimeout,
 			}
 			server = ghttp.NewServer()
 
@@ -143,8 +145,8 @@ var _ = Describe("FetchToken", func() {
 					}(&wg)
 
 					for i := 0; i < DefaultMaxNumberOfRetries; i++ {
-						Eventually(logger).Should(gbytes.Say("fetch-token-from-uaa-start.*bogus.url"))
-						Eventually(logger).Should(gbytes.Say("error-fetching-token"))
+						Eventually(logger, 2*time.Second).Should(gbytes.Say("fetch-token-from-uaa-start.*bogus.url"))
+						Eventually(logger, 2*time.Second).Should(gbytes.Say("error-fetching-token"))
 						clock.WaitForWatcherAndIncrement(DefaultRetryInterval + 10*time.Second)
 					}
 					wg.Wait()
