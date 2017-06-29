@@ -268,6 +268,44 @@ var _ = Describe("UAA Client", func() {
 		AfterEach(func() {
 			server.Close()
 		})
+
+		Context("when fetch issuer is already invoked", func() {
+			var privateKey *rsa.PrivateKey
+			BeforeEach(func() {
+
+				var err error
+				var publicKey *rsa.PublicKey
+				privateKey, publicKey, err = generateRSAKeyPair()
+				Expect(err).NotTo(HaveOccurred())
+				publicKeyPEM, err = publicKeyToPEM(publicKey)
+				Expect(err).NotTo(HaveOccurred())
+				var uaaResponseStruct = struct {
+					Alg   string `json:"alg"`
+					Value string `json:"value"`
+				}{"alg", string(publicKeyPEM)}
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", OpenIDConfigEndpoint),
+						ghttp.RespondWith(http.StatusOK, fmt.Sprintf("{\"issuer\":\"https://uaa.domain.com\"}")),
+					),
+					ghttp.RespondWithJSONEncoded(
+						http.StatusOK,
+						uaaResponseStruct,
+					),
+				)
+				_, err = uaaClient.FetchIssuer()
+				Expect(err).ToNot(HaveOccurred())
+			})
+			It("does not call issuer endpoint again for decoding tokens", func() {
+				validToken, err := makeValidToken(privateKey)
+				Expect(err).NotTo(HaveOccurred())
+
+				err = uaaClient.DecodeToken(validToken, "some.scope")
+				Expect(err).ToNot(HaveOccurred())
+				Expect(len(server.ReceivedRequests())).To(Equal(2))
+			})
+		})
+
 		Context("when UAA server responds with valid metadata structure", func() {
 			BeforeEach(func() {
 				uaaResponse := `{"issuer":"https://uaa.domain.com"}`
