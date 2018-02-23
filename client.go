@@ -345,7 +345,7 @@ func (u *UaaClient) DecodeToken(uaaToken string, desiredPermissions ...string) e
 	}
 
 	hasPermission := false
-	permissions := token.Claims["scope"]
+	permissions := token.Claims.(jwt.MapClaims)["scope"]
 
 	a := permissions.([]interface{})
 
@@ -373,7 +373,7 @@ func (u *UaaClient) isValidIssuer(token *jwt.Token) bool {
 			return false
 		}
 	}
-	if value, ok := token.Claims["iss"]; ok {
+	if value, ok := token.Claims.(jwt.MapClaims)["iss"]; ok {
 		return value == u.issuer
 	}
 	return false
