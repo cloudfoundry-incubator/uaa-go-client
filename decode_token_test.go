@@ -40,7 +40,7 @@ var _ = Describe("DecodeToken", func() {
 		validationError, ok := err.(*jwt.ValidationError)
 		Expect(ok).To(BeTrue())
 		Expect(validationError.Errors & errorType).To(Equal(errorType))
-		Expect(err.Error()).To(Equal(message))
+		Expect(err.Error()).To(ContainSubstring(message))
 	}
 
 	BeforeEach(func() {
