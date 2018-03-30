@@ -236,12 +236,12 @@ var _ = Describe("UAA Client", func() {
 		var (
 			uaaClient    uaa_go_client.Client
 			publicKeyPEM []byte
-			privateKey   *rsa.PrivateKey
 		)
+
 		BeforeEach(func() {
 			var err error
 			var publicKey *rsa.PublicKey
-			privateKey, publicKey, err = generateRSAKeyPair()
+			_, publicKey, err = generateRSAKeyPair()
 			Expect(err).NotTo(HaveOccurred())
 			publicKeyPEM, err = publicKeyToPEM(publicKey)
 			Expect(err).NotTo(HaveOccurred())
@@ -377,7 +377,7 @@ var _ = Describe("UAA Client", func() {
 			tlsServer = &http.Server{Handler: handler}
 
 			go func() {
-				err := tlsServer.Serve(tlsListener)
+				err = tlsServer.Serve(tlsListener)
 				Expect(err).ToNot(HaveOccurred())
 			}()
 

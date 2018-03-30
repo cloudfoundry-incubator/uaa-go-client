@@ -38,6 +38,7 @@ var _ = Describe("FetchToken", func() {
 				RequestTimeout:        DefaultRequestTimeout,
 			}
 		})
+
 		JustBeforeEach(func() {
 			var err error
 
@@ -131,9 +132,11 @@ var _ = Describe("FetchToken", func() {
 
 			Context("when OAuth server cannot be reached", func() {
 				It("retries number of times and finally returns an error", func(done Done) {
+					var err error
+
 					defer close(done)
 					cfg.UaaEndpoint = "http://bogus.url:80"
-					client, err := uaa_go_client.NewClient(logger, cfg, clock)
+					client, err = uaa_go_client.NewClient(logger, cfg, clock)
 					Expect(err).NotTo(HaveOccurred())
 					wg := sync.WaitGroup{}
 					wg.Add(1)

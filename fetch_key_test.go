@@ -21,12 +21,7 @@ import (
 )
 
 var _ = Describe("Fetch Key", func() {
-
-	var (
-		client uaa_go_client.Client
-		err    error
-		key    string
-	)
+	var client uaa_go_client.Client
 
 	Context("FetchKey", func() {
 		BeforeEach(func() {
@@ -54,18 +49,14 @@ var _ = Describe("Fetch Key", func() {
 			client, err = uaa_go_client.NewClient(logger, cfg, clock)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(client).NotTo(BeNil())
+
 		})
 
 		AfterEach(func() {
 			server.Close()
 		})
 
-		JustBeforeEach(func() {
-			key, err = client.FetchKey()
-		})
-
 		Context("when UAA is available and responsive", func() {
-
 			Context("and http request succeeds", func() {
 				BeforeEach(func() {
 					server.AppendHandlers(
@@ -75,7 +66,9 @@ var _ = Describe("Fetch Key", func() {
 						),
 					)
 				})
+
 				It("does return an error", func() {
+					key, err := client.FetchKey()
 					Expect(err).To(HaveOccurred())
 					Expect(key).To(BeEmpty())
 				})
@@ -92,6 +85,7 @@ var _ = Describe("Fetch Key", func() {
 				})
 
 				It("returns the key value", func() {
+					key, err := client.FetchKey()
 					Expect(err).NotTo(HaveOccurred())
 					Expect(key).NotTo(BeNil())
 					Expect(key).Should(Equal(PemDecodedKey))
@@ -109,6 +103,7 @@ var _ = Describe("Fetch Key", func() {
 				})
 
 				It("returns the error", func() {
+					key, err := client.FetchKey()
 					Expect(err).To(HaveOccurred())
 					Expect(err).Should(Equal(errors.New("unmarshalling error: unexpected EOF")))
 					Expect(key).To(BeEmpty())
@@ -126,6 +121,7 @@ var _ = Describe("Fetch Key", func() {
 				})
 
 				It("returns the error", func() {
+					key, err := client.FetchKey()
 					Expect(err).To(HaveOccurred())
 					Expect(err.Error()).To(ContainSubstring(("must be PEM encoded")))
 					Expect(key).To(BeEmpty())
@@ -143,6 +139,7 @@ var _ = Describe("Fetch Key", func() {
 				})
 
 				It("returns the error", func() {
+					key, err := client.FetchKey()
 					Expect(err).To(HaveOccurred())
 					Expect(err.Error()).Should(ContainSubstring("http error"))
 					Expect(key).To(BeEmpty())
@@ -152,12 +149,14 @@ var _ = Describe("Fetch Key", func() {
 
 		Context("when UAA is unavailable", func() {
 			BeforeEach(func() {
+				var err error
 				cfg.UaaEndpoint = "http://127.0.0.1:1111"
 				client, err = uaa_go_client.NewClient(logger, cfg, clock)
 				Expect(err).ToNot(HaveOccurred())
 			})
 
 			It("returns the error", func() {
+				key, err := client.FetchKey()
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).Should(ContainSubstring("connection refused"))
 				Expect(key).To(BeEmpty())

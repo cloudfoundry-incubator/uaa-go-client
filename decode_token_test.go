@@ -14,7 +14,6 @@ import (
 	"code.cloudfoundry.org/uaa-go-client/fakes"
 
 	"code.cloudfoundry.org/clock/fakeclock"
-	"code.cloudfoundry.org/lager"
 	"code.cloudfoundry.org/lager/lagertest"
 	"github.com/dgrijalva/jwt-go"
 
@@ -30,10 +29,8 @@ var _ = Describe("DecodeToken", func() {
 		// fakeUaaKeyFetcher *fakes.FakeUaaKeyFetcher
 		signedKey      string
 		UserPrivateKey string
-		logger         lager.Logger
 
 		token *jwt.Token
-		err   error
 	)
 
 	verifyErrorType := func(err error, errorType uint32, message string) {
@@ -107,6 +104,8 @@ var _ = Describe("DecodeToken", func() {
 	Describe("DecodeToken", func() {
 		Context("when the token is valid", func() {
 			BeforeEach(func() {
+				var err error
+
 				claims := map[string]interface{}{
 					"exp":   3404281214,
 					"scope": []string{"route.advertise"},
@@ -160,14 +159,14 @@ var _ = Describe("DecodeToken", func() {
 			})
 
 			It("returns an error if the user token is not signed", func() {
-				err = client.DecodeToken("bearer not-a-signed-token", "not a permission")
+				err := client.DecodeToken("bearer not-a-signed-token", "not a permission")
 				Expect(err).To(HaveOccurred())
 				verifyErrorType(err, jwt.ValidationErrorMalformed, "token contains an invalid number of segments")
 				Expect(len(server.ReceivedRequests())).To(Equal(1))
 			})
 
 			It("returns an invalid token format when there is no token type", func() {
-				err = client.DecodeToken("has-no-token-type", "not a permission")
+				err := client.DecodeToken("has-no-token-type", "not a permission")
 
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(Equal("Invalid token format"))
@@ -175,7 +174,7 @@ var _ = Describe("DecodeToken", func() {
 			})
 
 			It("returns an invalid token type when type is not bearer", func() {
-				err = client.DecodeToken("basic some-auth", "not a permission")
+				err := client.DecodeToken("basic some-auth", "not a permission")
 
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(Equal("Invalid token type: basic"))
@@ -185,6 +184,8 @@ var _ = Describe("DecodeToken", func() {
 
 		Context("when issuer is invalid", func() {
 			BeforeEach(func() {
+				var err error
+
 				fakeSigningMethod.VerifyReturns(errors.New("invalid signature"))
 
 				claims := map[string]interface{}{
@@ -221,6 +222,8 @@ var _ = Describe("DecodeToken", func() {
 
 		Context("when signature is invalid", func() {
 			BeforeEach(func() {
+				var err error
+
 				fakeSigningMethod.VerifyReturns(errors.New("invalid signature"))
 
 				claims := map[string]interface{}{
@@ -281,6 +284,8 @@ var _ = Describe("DecodeToken", func() {
 
 		Context("when verification key needs to be refreshed to validate the signature", func() {
 			BeforeEach(func() {
+				var err error
+
 				fakeSigningMethod.VerifyStub = func(signingString string, signature string, key interface{}) error {
 					switch k := key.(type) {
 					case []byte:
@@ -431,6 +436,8 @@ var _ = Describe("DecodeToken", func() {
 
 		Context("expired time", func() {
 			BeforeEach(func() {
+				var err error
+
 				claims := map[string]interface{}{
 					"exp": time.Now().Unix() - 5,
 					"iss": "https://uaa.domain.com",
@@ -451,7 +458,7 @@ var _ = Describe("DecodeToken", func() {
 			})
 
 			It("returns an error if the token is expired", func() {
-				err = client.DecodeToken(signedKey, "route.advertise")
+				err := client.DecodeToken(signedKey, "route.advertise")
 				Expect(err).To(HaveOccurred())
 				verifyErrorType(err, jwt.ValidationErrorExpired, "token is expired")
 			})
@@ -459,6 +466,8 @@ var _ = Describe("DecodeToken", func() {
 
 		Context("permissions", func() {
 			BeforeEach(func() {
+				var err error
+
 				claims := map[string]interface{}{
 					"exp":   time.Now().Unix() + 50000000,
 					"scope": []string{"route.foo"},
@@ -480,7 +489,7 @@ var _ = Describe("DecodeToken", func() {
 			})
 
 			It("returns an error if the the user does not have requested permissions", func() {
-				err = client.DecodeToken(signedKey, "route.my-permissions", "some.other.scope")
+				err := client.DecodeToken(signedKey, "route.my-permissions", "some.other.scope")
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(Equal("Token does not have 'route.my-permissions', 'some.other.scope' scope"))
 			})
