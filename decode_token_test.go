@@ -1,6 +1,9 @@
 package uaa_go_client_test
 
 import (
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	"net/http"
@@ -22,13 +25,17 @@ import (
 	"github.com/onsi/gomega/ghttp"
 )
 
+type customClaims struct {
+	Scope []string `json:"scope,omitempty"`
+	jwt.StandardClaims
+}
+
 var _ = Describe("DecodeToken", func() {
 	var (
 		client            uaa_go_client.Client
 		fakeSigningMethod *fakes.FakeSigningMethod
-		// fakeUaaKeyFetcher *fakes.FakeUaaKeyFetcher
-		signedKey      string
-		UserPrivateKey string
+		signedKey         string
+		UserPrivateKey    string
 
 		token *jwt.Token
 	)
@@ -106,12 +113,13 @@ var _ = Describe("DecodeToken", func() {
 			BeforeEach(func() {
 				var err error
 
-				claims := map[string]interface{}{
-					"exp":   3404281214,
-					"scope": []string{"route.advertise"},
-					"iss":   "https://uaa.domain.com",
+				token.Claims = customClaims{
+					Scope: []string{"route.advertise"},
+					StandardClaims: jwt.StandardClaims{
+						ExpiresAt: 3404281214,
+						Issuer:    "https://uaa.domain.com",
+					},
 				}
-				token.Claims = claims
 
 				signedKey, err = token.SignedString([]byte(UserPrivateKey))
 				Expect(err).NotTo(HaveOccurred())
@@ -188,12 +196,13 @@ var _ = Describe("DecodeToken", func() {
 
 				fakeSigningMethod.VerifyReturns(errors.New("invalid signature"))
 
-				claims := map[string]interface{}{
-					"exp":   3404281214,
-					"scope": []string{"route.advertise"},
-					"iss":   "boom",
+				token.Claims = customClaims{
+					Scope: []string{"route.advertise"},
+					StandardClaims: jwt.StandardClaims{
+						ExpiresAt: 3404281214,
+						Issuer:    "boom",
+					},
 				}
-				token.Claims = claims
 
 				signedKey, err = token.SignedString([]byte(UserPrivateKey))
 				Expect(err).NotTo(HaveOccurred())
@@ -226,12 +235,13 @@ var _ = Describe("DecodeToken", func() {
 
 				fakeSigningMethod.VerifyReturns(errors.New("invalid signature"))
 
-				claims := map[string]interface{}{
-					"exp":   3404281214,
-					"scope": []string{"route.advertise"},
-					"iss":   "https://uaa.domain.com",
+				token.Claims = customClaims{
+					Scope: []string{"route.advertise"},
+					StandardClaims: jwt.StandardClaims{
+						ExpiresAt: 3404281214,
+						Issuer:    "https://uaa.domain.com",
+					},
 				}
-				token.Claims = claims
 
 				signedKey, err = token.SignedString([]byte(UserPrivateKey))
 				Expect(err).NotTo(HaveOccurred())
@@ -284,26 +294,39 @@ var _ = Describe("DecodeToken", func() {
 
 		Context("when verification key needs to be refreshed to validate the signature", func() {
 			BeforeEach(func() {
-				var err error
-
 				fakeSigningMethod.VerifyStub = func(signingString string, signature string, key interface{}) error {
 					switch k := key.(type) {
-					case []byte:
-						if string(k) == PemDecodedKey {
+					case *rsa.PublicKey:
+						var keyBytes []byte
+						keyBytes, err := x509.MarshalPKIXPublicKey(k)
+						if err != nil {
+							return errors.New("failed to marshal key")
+						}
+
+						keyPEM := pem.EncodeToMemory(&pem.Block{
+							Type:  "PUBLIC KEY",
+							Bytes: keyBytes,
+						})
+
+						if strings.TrimSpace(string(keyPEM)) == PemDecodedKey {
 							return nil
 						}
-						return errors.New("invalid signature")
+
+						return errors.New("something went very wrong")
 					default:
 						return errors.New("invalid signature")
 					}
 				}
-				claims := map[string]interface{}{
-					"exp":   3404281214,
-					"scope": []string{"route.advertise"},
-					"iss":   "https://uaa.domain.com",
-				}
-				token.Claims = claims
 
+				token.Claims = customClaims{
+					Scope: []string{"route.advertise"},
+					StandardClaims: jwt.StandardClaims{
+						ExpiresAt: 3404281214,
+						Issuer:    "https://uaa.domain.com",
+					},
+				}
+
+				var err error
 				signedKey, err = token.SignedString([]byte(UserPrivateKey))
 				Expect(err).NotTo(HaveOccurred())
 				signedKey = "bearer " + signedKey
@@ -438,11 +461,12 @@ var _ = Describe("DecodeToken", func() {
 			BeforeEach(func() {
 				var err error
 
-				claims := map[string]interface{}{
-					"exp": time.Now().Unix() - 5,
-					"iss": "https://uaa.domain.com",
+				token.Claims = customClaims{
+					StandardClaims: jwt.StandardClaims{
+						ExpiresAt: time.Now().Unix() - 5,
+						Issuer:    "https://uaa.domain.com",
+					},
 				}
-				token.Claims = claims
 
 				signedKey, err = token.SignedString([]byte(UserPrivateKey))
 				Expect(err).NotTo(HaveOccurred())
@@ -460,7 +484,7 @@ var _ = Describe("DecodeToken", func() {
 			It("returns an error if the token is expired", func() {
 				err := client.DecodeToken(signedKey, "route.advertise")
 				Expect(err).To(HaveOccurred())
-				verifyErrorType(err, jwt.ValidationErrorExpired, "token is expired")
+				verifyErrorType(err, jwt.ValidationErrorExpired, "Token is expired")
 			})
 		})
 
@@ -468,12 +492,13 @@ var _ = Describe("DecodeToken", func() {
 			BeforeEach(func() {
 				var err error
 
-				claims := map[string]interface{}{
-					"exp":   time.Now().Unix() + 50000000,
-					"scope": []string{"route.foo"},
-					"iss":   "https://uaa.domain.com",
+				token.Claims = customClaims{
+					Scope: []string{"route.foo"},
+					StandardClaims: jwt.StandardClaims{
+						ExpiresAt: time.Now().Unix() + 50000000,
+						Issuer:    "https://uaa.domain.com",
+					},
 				}
-				token.Claims = claims
 
 				signedKey, err = token.SignedString([]byte(UserPrivateKey))
 				Expect(err).NotTo(HaveOccurred())
@@ -494,6 +519,5 @@ var _ = Describe("DecodeToken", func() {
 				Expect(err.Error()).To(Equal("Token does not have 'route.my-permissions', 'some.other.scope' scope"))
 			})
 		})
-
 	})
 })

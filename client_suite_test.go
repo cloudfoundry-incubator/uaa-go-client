@@ -38,7 +38,7 @@ const (
 	DefaultRequestTimeout       = 1 * time.Second
 	DefaultExpirationBufferTime = 30
 	ValidPemPublicKey           = `-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDHFr+KICms+tuT1OXJwhCUmR2d\nKVy7psa8xzElSyzqx7oJyfJ1JZyOzToj9T5SfTIq396agbHJWVfYphNahvZ/7uMX\nqHxf+ZH9BL1gk9Y6kCnbM5R60gfwjyW1/dQPjOzn9N394zd2FJoFHwdq9Qs0wBug\nspULZVNRxq7veq/fzwIDAQAB\n-----END PUBLIC KEY-----`
-	InvalidPemPublicKey         = `-----BEGIN PUBLIC KEY-----\nMJGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDHFr+KICms+tuT1OXJwhCUmR2d\nKVy7psa8xzElSyzqx7oJyfJ1JZyOzToj9T5SfTIq396agbHJWVfYphNahvZ/7uMX\nqHxf+ZH9BL1gk9Y6kCnbM5R60gfwjyW1/dQPjOzn9N394zd2FJoFHwdq9Qs0wBug\nspULZVNRxq7veq/fzwIDAQAB\n-----END PUBLIC KEY-----`
+	InvalidPemPublicKey         = `-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCm5HB9+O6fyjsvWSKzyEZkXv+p\nRHmWq61cYx2ywzBaR59TuH4E98nsWr7o5TaEmX9cuxN261Gq03Qb9D3XRL3KHCaz\n21OTp5bU92CKZWQoZW5jd5ENhopMpUGcV1x9ra1IkdYoTsDt8dRjiOHmOdsc7jZ1\noHp3lFu0JlGTn3TJowIDAQAB\n-----END PUBLIC KEY-----\n`
 	PemDecodedKey               = `-----BEGIN PUBLIC KEY-----
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDHFr+KICms+tuT1OXJwhCUmR2d
 KVy7psa8xzElSyzqx7oJyfJ1JZyOzToj9T5SfTIq396agbHJWVfYphNahvZ/7uMX

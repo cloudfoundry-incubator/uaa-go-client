@@ -292,14 +292,19 @@ var _ = Describe("UAA Client", func() {
 						ghttp.VerifyRequest("GET", OpenIDConfigEndpoint),
 						ghttp.RespondWith(http.StatusOK, fmt.Sprintf("{\"issuer\":\"https://uaa.domain.com\"}")),
 					),
-					ghttp.RespondWithJSONEncoded(
-						http.StatusOK,
-						uaaResponseStruct,
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", "/token_key"),
+						ghttp.RespondWithJSONEncoded(
+							http.StatusOK,
+							uaaResponseStruct,
+						),
 					),
 				)
+
 				_, err = uaaClient.FetchIssuer()
 				Expect(err).ToNot(HaveOccurred())
 			})
+
 			It("does not call issuer endpoint again for decoding tokens", func() {
 				validToken, err := makeValidToken(privateKey)
 				Expect(err).NotTo(HaveOccurred())

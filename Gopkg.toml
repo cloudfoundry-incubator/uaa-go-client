@@ -39,10 +39,6 @@ required = ["github.com/onsi/ginkgo/ginkgo"]
   name = "code.cloudfoundry.org/trace-logger"
 
 [[constraint]]
-  name = "github.com/dgrijalva/jwt-go"
-  version = "2.3.0"
-
-[[constraint]]
   name = "github.com/onsi/ginkgo"
   version = "1.4.0"
 

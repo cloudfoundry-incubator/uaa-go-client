@@ -29,8 +29,8 @@
 [[projects]]
   name = "github.com/dgrijalva/jwt-go"
   packages = ["."]
-  revision = "268038b363c7a8d7306b8e35bf77a1fde4b0c402"
-  version = "v2.7.0"
+  revision = "06ea1031745cb8b3dab3f6a236daf2b0aa468b7e"
+  version = "v3.2.0"
 
 [[projects]]
   name = "github.com/golang/protobuf"
@@ -140,6 +140,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b499292941772f53669a106c1eaa447dfd46207407b6940bd3edc3f635f31483"
+  inputs-digest = "61dd143c35518beef2432f7f5002774ab3bfefd048596f2056e86c113faf7381"
   solver-name = "gps-cdcl"
   solver-version = 1
