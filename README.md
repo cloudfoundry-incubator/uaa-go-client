@@ -11,7 +11,7 @@ A go library for Cloud Foundry [UAA](https://github.com/cloudfoundry/uaa) that p
 
 Dependecies for `uaa-go-client` are now vendored using `dep`:
 ```bash
-git clone https://github.com/cloudfoundry/uaa-go-client
+git clone https://github.com/cloudfoundry-incubator/uaa-go-client
 cd uaa-go-client
 go get github.com/golang/dep/cmd/dep
 dep ensure
