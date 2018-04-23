@@ -9,15 +9,15 @@ A go library for Cloud Foundry [UAA](https://github.com/cloudfoundry/uaa) that p
 
 ## Setup
 
-As dependecies for uaa-go-client are not vendored, you should clone the [routing-release](https://github.com/cloudfoundry-incubator/routing-release) repo to get compatible versions of its dependencies.
+Dependecies for `uaa-go-client` are now vendored using `dep`:
 ```bash
-git clone https://github.com/cloudfoundry-incubator/routing-release
-cd routing-release
-./scripts/update
-cd src/code.cloudfoundry.org/uaa-go-client
+git clone https://github.com/cloudfoundry/uaa-go-client
+cd uaa-go-client
+go get github.com/golang/dep/cmd/dep
+dep ensure
 ```
 
-If you are using this client as a dependency in your own go project, import it from `code.cloudfoundry.org/uaa-go-client`, then determine compatible versions of this projects dependencies by cloning [routing-release](https://github.com/cloudfoundry-incubator/routing-release).
+If you are using this client as a dependency in your own go project, import it from `code.cloudfoundry.org/uaa-go-client`.
 
 ## Example
 This example client connects to UAA using https and skips cert verification.
