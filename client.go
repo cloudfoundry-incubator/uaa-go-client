@@ -62,16 +62,7 @@ type clock interface {
 	Sleep(d time.Duration)
 }
 
-func NewClient(l interface{}, cfg *config.Config, clock clock) (Client, error) {
-	var logger lager.Logger
-
-	lg, ok := l.(lager.Logger)
-	if ok {
-		logger = lager.Logger(lg)
-	} else {
-		return nil, errors.New("invalid logger passed in: must be lager.Logger")
-	}
-
+func NewClient(logger lager.Logger, cfg *config.Config, clock clock) (Client, error) {
 	logger.Session("uaa-client")
 
 	var (
