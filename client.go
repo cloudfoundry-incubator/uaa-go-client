@@ -347,6 +347,11 @@ func (u *UaaClient) DecodeToken(uaaToken string, desiredPermissions ...string) e
 					forceUaaKeyFetch = true
 					continue
 				}
+				if matchesError(err, jwt.ValidationErrorIssuedAt) {
+					logger.Info("decode-token-ignoring-issued-at-validation")
+					err = nil
+					break
+				}
 			}
 		}
 

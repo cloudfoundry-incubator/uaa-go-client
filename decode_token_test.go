@@ -22,6 +22,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/ghttp"
 )
 
@@ -485,6 +486,38 @@ var _ = Describe("DecodeToken", func() {
 				err := client.DecodeToken(signedKey, "route.advertise")
 				Expect(err).To(HaveOccurred())
 				verifyErrorType(err, jwt.ValidationErrorExpired, "Token is expired")
+			})
+		})
+
+		Context("token is used before issued", func() {
+			BeforeEach(func() {
+				var err error
+
+				token.Claims = customClaims{
+					Scope: []string{"route.foo"},
+					StandardClaims: jwt.StandardClaims{
+						IssuedAt: time.Now().Unix() + 100,
+						Issuer:   "https://uaa.domain.com",
+					},
+				}
+
+				signedKey, err = token.SignedString([]byte(UserPrivateKey))
+				Expect(err).NotTo(HaveOccurred())
+
+				signedKey = "bearer " + signedKey
+				server.AppendHandlers(
+					getSuccessKeyFetchHandler(ValidPemPublicKey),
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", OpenIDConfigEndpoint),
+						ghttp.RespondWith(http.StatusOK, `{"issuer":"https://uaa.domain.com"}`),
+					),
+				)
+			})
+
+			It("logs the error but successfully validates", func() {
+				err := client.DecodeToken(signedKey, "route.foo")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(logger).To(gbytes.Say("decode-token-ignoring-issued-at-validation"))
 			})
 		})
 
