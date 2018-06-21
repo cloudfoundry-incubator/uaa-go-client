@@ -2,6 +2,7 @@ package uaa_go_client_test
 
 import (
 	"crypto"
+	"crypto/ecdsa"
 	"crypto/hmac"
 	"crypto/rand"
 	"crypto/rsa"
@@ -11,17 +12,17 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"fmt"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"net/url"
-	"path"
-	"path/filepath"
+	"os"
 	"strings"
 	"time"
 
 	"code.cloudfoundry.org/clock/fakeclock"
 	"code.cloudfoundry.org/lager/lagertest"
-	"code.cloudfoundry.org/uaa-go-client"
+	uaa_go_client "code.cloudfoundry.org/uaa-go-client"
 	"code.cloudfoundry.org/uaa-go-client/config"
 
 	. "github.com/onsi/ginkgo"
@@ -354,11 +355,12 @@ var _ = Describe("UAA Client", func() {
 		})
 	})
 	Context("secure (TLS) client", func() {
-
 		var (
-			tlsServer   *http.Server
-			tlsListener net.Listener
+			tlsServer     *http.Server
+			tlsListener   net.Listener
+			rawCALocation string
 		)
+
 		BeforeEach(func() {
 			forceUpdate = false
 			cfg = &config.Config{
@@ -378,8 +380,21 @@ var _ = Describe("UAA Client", func() {
 				w.Write([]byte(fmt.Sprintf("{\"alg\":\"alg\", \"value\": \"%s\" }", ValidPemPublicKey)))
 			})
 
-			tlsListener = newTlsListener(listener)
+			caCert, caPrivateKey, err := createCA()
+			Expect(err).NotTo(HaveOccurred())
+
+			tlsListener = newTlsListener(listener, caCert, caPrivateKey)
 			tlsServer = &http.Server{Handler: handler}
+
+			f, err := ioutil.TempFile("", "uaa-go-ca-cert")
+			Expect(err).NotTo(HaveOccurred())
+
+			err = pem.Encode(f, &pem.Block{Type: "CERTIFICATE", Bytes: caCert.Raw})
+			Expect(err).NotTo(HaveOccurred())
+
+			rawCALocation = f.Name()
+			err = f.Close()
+			Expect(err).NotTo(HaveOccurred())
 
 			go func() {
 				err = tlsServer.Serve(tlsListener)
@@ -395,16 +410,19 @@ var _ = Describe("UAA Client", func() {
 			logger = lagertest.NewTestLogger("test")
 		})
 
+		AfterEach(func() {
+			err := os.Remove(rawCALocation)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
 		Context("when CA cert provided", func() {
 			var (
 				tlsClient uaa_go_client.Client
 			)
 
 			BeforeEach(func() {
-				caCertPath, err := filepath.Abs(path.Join("fixtures", "ca.pem"))
-				Expect(err).ToNot(HaveOccurred())
-
-				cfg.CACerts = caCertPath
+				var err error
+				cfg.CACerts = rawCALocation
 				cfg.MaxNumberOfRetries = 0
 				tlsClient, err = uaa_go_client.NewClient(logger, cfg, clock)
 				Expect(err).ToNot(HaveOccurred())
@@ -451,15 +469,14 @@ var _ = Describe("UAA Client", func() {
 	})
 })
 
-func newTlsListener(listener net.Listener) net.Listener {
-	public := "fixtures/server.pem"
-	private := "fixtures/server.key"
-	cert, err := tls.LoadX509KeyPair(public, private)
-	Expect(err).ToNot(HaveOccurred())
+func newTlsListener(listener net.Listener, caCert *x509.Certificate, caPrivKey *ecdsa.PrivateKey) net.Listener {
+	cert, err := createCertificate(caCert, caPrivKey, isServer)
+	if err != nil {
+		panic(err)
+	}
 
 	tlsConfig := &tls.Config{
 		Certificates: []tls.Certificate{cert},
-		CipherSuites: []uint16{tls.TLS_RSA_WITH_AES_256_CBC_SHA},
 	}
 
 	return tls.NewListener(listener, tlsConfig)
