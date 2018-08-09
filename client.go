@@ -131,6 +131,7 @@ func newSecureClient(cfg *config.Config) (*http.Client, error) {
 
 	tr := &http.Transport{
 		TLSClientConfig: tlsConfig,
+		Proxy:           http.ProxyFromEnvironment,
 	}
 
 	client := &http.Client{Transport: tr}
