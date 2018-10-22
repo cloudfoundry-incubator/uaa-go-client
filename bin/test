@@ -4,6 +4,6 @@ set -e -u -x
 
 cd $(dirname "${BASH_SOURCE[0]}")/..
 
-go install code.cloudfoundry.org/uaa-go-client/vendor/github.com/onsi/ginkgo/ginkgo
+go install github.com/onsi/ginkgo/ginkgo
 
 ginkgo -r -failOnPending -randomizeAllSpecs -race -p "$@"
