@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"code.cloudfoundry.org/clock/fakeclock"
-	"code.cloudfoundry.org/uaa-go-client"
+	uaa_go_client "code.cloudfoundry.org/uaa-go-client"
 	"code.cloudfoundry.org/uaa-go-client/config"
 	"code.cloudfoundry.org/uaa-go-client/schema"
 
@@ -90,6 +90,11 @@ var getSuccessKeyFetchHandler = func(key string) http.HandlerFunc {
 	)
 }
 
+// This function is flaky, there's a race condition between the FetchToken and
+// the expectation on the recieved requests size. The tests calling it have been
+// marked as skiped since we are expecting to deprecate this repo around fall 2019.
+// If we end up continuing to use this repo, we should re-enable the tests and fix
+// the race condition in this function.
 var verifyFetchWithRetries = func(client uaa_go_client.Client, server *ghttp.Server, numRetries int, expectedErrorMsg string) {
 	var err error
 	wg := sync.WaitGroup{}
