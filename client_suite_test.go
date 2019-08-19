@@ -119,7 +119,7 @@ var verifyFetchWithRetries = func(client uaa_go_client.Client, server *ghttp.Ser
 var getRegisterOauthClientHandlerFunc = func(status int, token *schema.Token, oauthClient *schema.OauthClient) http.HandlerFunc {
 	oauthClientString, err := json.Marshal(oauthClient)
 	var responseBody string
-	if status == http.StatusOK {
+	if status == http.StatusCreated {
 		responseBody = string(oauthClientString)
 	} else {
 		responseBody = ""

@@ -8,7 +8,7 @@ import (
 
 	"code.cloudfoundry.org/clock/fakeclock"
 	"code.cloudfoundry.org/lager/lagertest"
-	"code.cloudfoundry.org/uaa-go-client"
+	uaa_go_client "code.cloudfoundry.org/uaa-go-client"
 	"code.cloudfoundry.org/uaa-go-client/config"
 	"code.cloudfoundry.org/uaa-go-client/schema"
 
@@ -49,7 +49,7 @@ var _ = Describe("RegisterOauthClient", func() {
 		Expect(client).NotTo(BeNil())
 	})
 
-	Context("when OAuth server returns 200 OK", func() {
+	Context("when OAuth server returns 201 CREATED", func() {
 		It("does not return an error", func() {
 			accessToken := &schema.Token{
 				AccessToken: "the token",
@@ -70,7 +70,7 @@ var _ = Describe("RegisterOauthClient", func() {
 
 			server.AppendHandlers(
 				getOauthHandlerFunc(http.StatusOK, accessToken),
-				getRegisterOauthClientHandlerFunc(http.StatusOK, accessToken, oauthClient),
+				getRegisterOauthClientHandlerFunc(http.StatusCreated, accessToken, oauthClient),
 			)
 
 			receivedOauthClient, err := client.RegisterOauthClient(oauthClient)

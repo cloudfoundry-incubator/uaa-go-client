@@ -436,7 +436,7 @@ func (u *UaaClient) RegisterOauthClient(oauthClient *schema.OauthClient) (*schem
 		return nil, ErrClientAlreadyExists
 	}
 
-	if response.StatusCode != http.StatusOK {
+	if response.StatusCode != http.StatusCreated {
 		return nil, err
 	}
 
