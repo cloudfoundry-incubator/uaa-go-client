@@ -4,7 +4,7 @@
 
 **This library is no longer maintained.**
 
-Consider using the [`cloudfoundry-community/go-uaa`](https://github.com/cloudfoundry-community/go-uaa) instead.
+Consider using the [`cloudfoundry-community/go-uaa`](https://github.com/cloudfoundry-community/go-uaa) client library instead.
 
 # uaa-go-client
 A go library for Cloud Foundry [UAA](https://github.com/cloudfoundry/uaa) that provides the following:
