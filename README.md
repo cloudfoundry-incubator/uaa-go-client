@@ -1,5 +1,11 @@
 [![Build Status](https://travis-ci.org/cloudfoundry-incubator/uaa-go-client.svg?branch=master)](https://travis-ci.org/cloudfoundry-incubator/uaa-go-client)
 
+# NOTICE
+
+**This library is no longer maintained.**
+
+Consider using the [`cloudfoundry-community/go-uaa`](https://github.com/cloudfoundry-community/go-uaa) instead.
+
 # uaa-go-client
 A go library for Cloud Foundry [UAA](https://github.com/cloudfoundry/uaa) that provides the following:
 - fetch access tokens (including ability to cache tokens)
