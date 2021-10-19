@@ -12,13 +12,13 @@ import (
 	"sync"
 	"time"
 
-	"code.cloudfoundry.org/uaa-go-client"
+	uaa_go_client "code.cloudfoundry.org/uaa-go-client"
 	"code.cloudfoundry.org/uaa-go-client/config"
 	"code.cloudfoundry.org/uaa-go-client/fakes"
 
 	"code.cloudfoundry.org/clock/fakeclock"
 	"code.cloudfoundry.org/lager/lagertest"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v4"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -26,6 +26,7 @@ import (
 	"github.com/onsi/gomega/ghttp"
 )
 
+//go:generate counterfeiter -o fakes/fake_signing_method.go ../vendor/github.com/golang-jwt/jwt/v4/signing_method.go SigningMethod
 type customClaims struct {
 	Scope []string `json:"scope,omitempty"`
 	jwt.StandardClaims

@@ -16,7 +16,7 @@ import (
 	"time"
 
 	trace "code.cloudfoundry.org/trace-logger"
-	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v4"
 
 	"code.cloudfoundry.org/lager"
 
